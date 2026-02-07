@@ -124,18 +124,12 @@ export class RegistrySubscriptionManager {
       }
 
       this.isSubscribed = true;
-      
+
       // Initialize hashes with current state
       await this.initializeHashes();
       
-      // Always use polling as a safety net (even if subscriptions work)
-      // This catches cases where WebSocket events might be missed
-      this.startPollingFallback();
-      
     } catch (error) {
-      // Fallback: Use polling-based updates if subscriptions fail
-      console.warn('Apple Home Dashboard: Registry subscriptions not available, using polling fallback');
-      this.startPollingFallback();
+      // WebSocket subscriptions not available - changes will be picked up on next navigation
     }
   }
 
@@ -164,11 +158,10 @@ export class RegistrySubscriptionManager {
    * Handle entity registry update events
    */
   private handleEntityRegistryEvent(event: any): void {
-    // Event contains { action: 'create'|'update'|'remove', entity_id: string }
-    this.scheduleUpdate({ 
-      type: 'entity', 
+    this.scheduleUpdate({
+      type: 'entity',
       action: event.data?.action || 'update',
-      data: event.data 
+      data: event.data
     });
   }
 

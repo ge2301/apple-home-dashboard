@@ -960,9 +960,9 @@ export class HomeSettingsManager {
     let entityList: any[];
     if (setting === 'extraAccessories') {
       entityList = this.allEntitiesForInclusion;
-    } else if (setting === 'favoriteAccessories') {
-      // For favorites, include both available entities AND extra accessories
-      // This allows users to set manually added entities as favorites
+    } else if (setting === 'favoriteAccessories' || setting === 'excludedFromDashboard' || setting === 'excludedFromHome') {
+      // For favorites and exclude lists, include both available entities AND extra accessories
+      // This allows users to exclude/favorite manually added entities
       const extraAccessoryIds = new Set(this.tempSettings.extraAccessories);
       const includedFromOtherList = this.allEntitiesForInclusion.filter(e => extraAccessoryIds.has(e.entity_id));
       entityList = [...this.availableEntities, ...includedFromOtherList];
@@ -982,10 +982,18 @@ export class HomeSettingsManager {
         return false;
       }
       
-      // Exclude switches from favorites, excludedFromDashboard, and excludedFromHome if showSwitches is disabled
+      // When showSwitches is disabled, only show outlets and explicitly included switches
+      // in favorites/exclude lists (since those are still visible on the dashboard)
       if (!this.tempSettings.showSwitches && entity.domain === 'switch') {
         if (setting === 'favoriteAccessories' || setting === 'excludedFromDashboard' || setting === 'excludedFromHome') {
-          return false;
+          const isOutlet = entity.attributes?.device_class === 'outlet' ||
+                           entity.entity_id.toLowerCase().includes('outlet') ||
+                           entity.friendly_name.toLowerCase().includes('outlet');
+          const isIncluded = Array.isArray(this.tempSettings.includedSwitches) &&
+                             this.tempSettings.includedSwitches.includes(entity.entity_id);
+          if (!isOutlet && !isIncluded) {
+            return false;
+          }
         }
       }
       

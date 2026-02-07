@@ -79,47 +79,48 @@ export class RoomPage {
     // Store container reference for use in save methods
     this._container = container;
     
-    // Preserve existing header and permanent chips elements
-    const existingHeader = container.querySelector('.apple-home-header');
-    const existingPermanentChips = container.querySelector('.permanent-chips');
-    
-    // Clear container but preserve important elements
-    container.innerHTML = '';
-    
-    // Re-insert preserved elements in correct order
-    if (existingHeader) {
-      container.appendChild(existingHeader);
-    }
-    
-    // Add room title
+    // Remove only dynamic content, keep permanent elements (header, chips) in place
+    const permanentSelectors = ['.apple-home-header', '.permanent-chips'];
+    Array.from(container.children).forEach(child => {
+      const isPermanent = permanentSelectors.some(sel => child.matches(sel));
+      if (!isPermanent) child.remove();
+    });
+
+    // Add room title after header but before chips
     const roomTitle = this.createRoomTitle(areaName);
-    container.appendChild(roomTitle);
-    
-    // Re-insert permanent chips after title (this ensures chips are always below h1)
+    const existingPermanentChips = container.querySelector('.permanent-chips');
     if (existingPermanentChips) {
-      container.appendChild(existingPermanentChips);
+      container.insertBefore(roomTitle, existingPermanentChips);
+    } else {
+      container.appendChild(roomTitle);
     }
 
     try {
-      // Get data from Home Assistant
-      const areas = await DataService.getAreas(hass);
-      const entities = await DataService.getEntities(hass);
-      const devices = await DataService.getDevices(hass);
-      
-      // Get showSwitches, includedSwitches, and extraAccessories settings
-      const showSwitches = await this.customizationManager?.getShowSwitches() || false;
-      const includedSwitches = await this.customizationManager?.getIncludedSwitches() || [];
-      const extraAccessories = await this.customizationManager?.getExtraAccessories() || [];
+      // Fetch all data in parallel
+      const [areas, entities, devices, showSwitches, includedSwitches, extraAccessories] = await Promise.all([
+        DataService.getAreas(hass),
+        DataService.getEntities(hass),
+        DataService.getDevices(hass),
+        this.customizationManager?.getShowSwitches().then(v => v || false) ?? Promise.resolve(false),
+        this.customizationManager?.getIncludedSwitches().then(v => v || []) ?? Promise.resolve([] as string[]),
+        this.customizationManager?.getExtraAccessories().then(v => v || []) ?? Promise.resolve([] as string[])
+      ]);
       
       // Filter entities for supported domains and exclude those marked for exclusion
       const supportedEntities = entities.filter(entity => {
         const domain = entity.entity_id.split('.')[0];
-        
+
         // Check if this entity is in the extraAccessories list (manually added entities)
         if (extraAccessories.includes(entity.entity_id)) {
           return true;
         }
-        
+
+        // Exclude configuration and diagnostic entities from auto-discovery
+        // These should only be included via custom entities (extra accessories)
+        if (entity.entity_category === 'config' || entity.entity_category === 'diagnostic') {
+          return false;
+        }
+
         if (!DashboardConfig.isSupportedDomain(domain)) {
           return false;
         }
@@ -145,8 +146,12 @@ export class RoomPage {
 
       // Create a separate list for status section that includes sensor domains
       const statusEntities = entities.filter(entity => {
+        // Exclude configuration and diagnostic entities from auto-discovery
+        if (entity.entity_category === 'config' || entity.entity_category === 'diagnostic') {
+          return false;
+        }
         const domain = entity.entity_id.split('.')[0];
-        
+
         if (!DashboardConfig.isStatusDomain(domain)) {
           return false;
         }
@@ -170,23 +175,11 @@ export class RoomPage {
         return true;
       });
 
-      // Now apply exclusions asynchronously to both lists
-      const filteredEntities = [];
-      const filteredStatusEntities = [];
-      
-      for (const entity of supportedEntities) {
-        const isExcluded = await this.customizationManager?.isEntityExcludedFromDashboard(entity.entity_id) || false;
-        if (!isExcluded) {
-          filteredEntities.push(entity);
-        }
-      }
-      
-      for (const entity of statusEntities) {
-        const isExcluded = await this.customizationManager?.isEntityExcludedFromDashboard(entity.entity_id) || false;
-        if (!isExcluded) {
-          filteredStatusEntities.push(entity);
-        }
-      }
+      // Batch-fetch exclusion list once, then filter synchronously
+      const excludedFromDashboard = new Set(await this.customizationManager?.getExcludedFromDashboard() || []);
+
+      const filteredEntities = supportedEntities.filter(entity => !excludedFromDashboard.has(entity.entity_id));
+      const filteredStatusEntities = statusEntities.filter(entity => !excludedFromDashboard.has(entity.entity_id));
       
       // Group regular entities by area (excluding sensors)
       const entitiesByArea = DataService.groupEntitiesByArea(filteredEntities, areas, devices);

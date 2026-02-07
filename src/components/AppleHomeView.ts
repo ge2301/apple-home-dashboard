@@ -13,7 +13,7 @@ import { RoomPage } from '../pages/RoomPage';
 import { ScenesPage } from '../pages/ScenesPage';
 import { CamerasPage } from '../pages/CamerasPage';
 import { DeviceGroup } from '../config/DashboardConfig';
-import { RegistrySubscriptionManager, RegistryChangeCallback } from '../utils/RegistrySubscriptionManager';
+import { RegistrySubscriptionManager, RegistryChangeCallback, RegistryChangeEvent } from '../utils/RegistrySubscriptionManager';
 
 export class AppleHomeView extends HTMLElement {
   // Dashboard-specific management - keyed by dashboard URL base
@@ -214,13 +214,8 @@ export class AppleHomeView extends HTMLElement {
     
     // Create the handler for registry changes
     this.registryChangeHandler = (event) => {
-      // Skip refresh during edit mode to prevent breaking drag and drop
-      if (this.editModeManager?.editMode) {
-        return;
-      }
-      
-      // Trigger a full refresh when registry changes
-      this.handleRegistryChange(event.type);
+      if (this.editModeManager?.editMode) return;
+      this.handleRegistryChange(event);
     };
     
     this.registrySubscriptionManager.addListener(this.registryChangeHandler);
@@ -242,22 +237,153 @@ export class AppleHomeView extends HTMLElement {
   }
 
   /**
-   * Handle registry changes (entity, device, area updates)
+   * Handle registry changes with surgical DOM updates - no full page rebuilds.
    */
-  private async handleRegistryChange(changeType: string): Promise<void> {
-    // Skip if not rendered or transitioning
-    if (!this._rendered || this._isTransitioning || !this._hass) {
+  private async handleRegistryChange(event: RegistryChangeEvent): Promise<void> {
+    if (!this._rendered || this._isTransitioning || !this._hass || !this.content) return;
+
+    switch (event.type) {
+      case 'entity':
+        await this.handleEntityChange(event);
+        break;
+      case 'area':
+        await this.handleAreaChange(event);
+        break;
+      case 'device':
+        // Device area changes affect entities on that device.
+        // The entity registry events will fire separately for those, so no action needed here.
+        break;
+    }
+  }
+
+  private async handleEntityChange(event: RegistryChangeEvent): Promise<void> {
+    const entityId = event.data?.entity_id;
+    if (!entityId || !this.content || !this._hass) return;
+
+    if (event.action === 'remove') {
+      this.fadeOutCard(entityId);
       return;
     }
-    
-    // Skip if in edit mode
-    if (this.editModeManager?.editMode) {
+
+    // For create/update, check current entity registry state from hass
+    const entityReg = this._hass.entities?.[entityId];
+
+    if (event.action === 'update' && entityReg) {
+      // Entity hidden or disabled → fade out
+      if (entityReg.hidden_by || entityReg.disabled_by) {
+        this.fadeOutCard(entityId);
+        return;
+      }
+
+      // Check if entity moved areas
+      const newAreaId = entityReg.area_id
+        || (entityReg.device_id ? this._hass.devices?.[entityReg.device_id]?.area_id : null)
+        || 'no_area';
+
+      const wrapper = this.content.querySelector(`.entity-card-wrapper[data-entity-id="${entityId}"]`) as HTMLElement;
+      if (wrapper) {
+        const currentGrid = wrapper.closest('.area-entities') as HTMLElement;
+        const currentAreaId = currentGrid?.dataset?.areaId;
+
+        if (currentAreaId && currentAreaId !== newAreaId) {
+          // Entity moved to a different area
+          const targetGrid = this.content.querySelector(`.area-entities[data-area-id="${newAreaId}"]`) as HTMLElement;
+          if (targetGrid) {
+            // Move card to the target area grid
+            wrapper.style.transition = 'opacity 0.2s ease';
+            wrapper.style.opacity = '0';
+            await new Promise(r => setTimeout(r, 200));
+            targetGrid.appendChild(wrapper);
+            wrapper.style.opacity = '1';
+          } else {
+            // Target area not on this page - just remove card
+            this.fadeOutCard(entityId);
+          }
+          this.cleanupEmptySection(currentGrid);
+        }
+      }
+      // If card not in DOM but entity exists and isn't hidden → was previously hidden, skip
+      // It will appear on next navigation
+    }
+  }
+
+  private async handleAreaChange(event: RegistryChangeEvent): Promise<void> {
+    if (!this.content || !this._hass) return;
+
+    if (event.action === 'remove') {
+      const areaId = event.data?.area_id;
+      if (!areaId) return;
+      const grid = this.content.querySelector(`.area-entities[data-area-id="${areaId}"]`) as HTMLElement;
+      if (grid) {
+        const title = grid.previousElementSibling as HTMLElement;
+        grid.style.transition = 'opacity 0.2s ease';
+        grid.style.opacity = '0';
+        if (title?.classList.contains('area-title')) {
+          title.style.transition = 'opacity 0.2s ease';
+          title.style.opacity = '0';
+        }
+        await new Promise(r => setTimeout(r, 200));
+        grid.remove();
+        if (title?.classList.contains('area-title')) title.remove();
+      }
       return;
     }
-    
-    // Force a complete refresh to pick up registry changes
-    this._rendered = false;
-    await this.renderPage(`registryChange-${changeType}`);
+
+    if (event.action === 'update') {
+      // Area renamed - update all matching titles
+      try {
+        const areas = await this._hass.callWS({ type: 'config/area_registry/list' });
+        for (const area of areas) {
+          const grid = this.content.querySelector(`.area-entities[data-area-id="${area.area_id}"]`);
+          if (grid) {
+            const title = grid.previousElementSibling;
+            if (title?.classList.contains('area-title')) {
+              const span = title.querySelector('span');
+              if (span && span.textContent !== area.name) {
+                span.textContent = area.name;
+              }
+            }
+          }
+        }
+      } catch {
+        // Silent fail
+      }
+    }
+  }
+
+  private fadeOutCard(entityId: string): void {
+    if (!this.content) return;
+    const wrapper = this.content.querySelector(`.entity-card-wrapper[data-entity-id="${entityId}"]`) as HTMLElement;
+    if (!wrapper) return;
+
+    const parentGrid = wrapper.closest('.area-entities') as HTMLElement;
+
+    // Cleanup the card's resources before removing
+    const card = wrapper.querySelector('apple-home-card') as any;
+    if (card && typeof card.cleanup === 'function') card.cleanup();
+
+    wrapper.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    wrapper.style.opacity = '0';
+    wrapper.style.transform = 'scale(0.8)';
+    setTimeout(() => {
+      wrapper.remove();
+      if (parentGrid) this.cleanupEmptySection(parentGrid);
+    }, 250);
+  }
+
+  private cleanupEmptySection(grid: HTMLElement): void {
+    if (!grid || grid.children.length > 0) return;
+    const title = grid.previousElementSibling as HTMLElement;
+    grid.style.transition = 'opacity 0.2s ease';
+    grid.style.opacity = '0';
+    if (title?.classList.contains('area-title')) {
+      title.style.transition = 'opacity 0.2s ease';
+      title.style.opacity = '0';
+    }
+    setTimeout(() => {
+      grid.remove();
+      if (title?.classList.contains('area-title')) title.remove();
+    }, 200);
   }
 
   /**
@@ -311,9 +437,6 @@ export class AppleHomeView extends HTMLElement {
     // This prevents state corruption during navigation
     this._rendered = false;
     
-    
-    // Check if this is actually a different config
-    const configChanged = JSON.stringify(this.config) !== JSON.stringify(config);
     
     this.config = config;
 
@@ -645,21 +768,17 @@ export class AppleHomeView extends HTMLElement {
     // Ensure shadow root is properly initialized
     this.ensureShadowRootExists();
     
-    // Clear existing content but preserve permanent elements (header, chips)
+    // Remove only dynamic content, keep permanent elements (header, chips) in place
     if (this.content) {
-      // Save permanent elements before clearing
-      const permanentHeader = this.content.querySelector('.apple-home-header.permanent-header');
-      const permanentChips = this.content.querySelector('.permanent-chips');
-      
-      this.content.innerHTML = '';
-      
-      // Restore permanent elements in correct order
-      if (permanentHeader) {
-        this.content.appendChild(permanentHeader);
-      }
+      const permanentSelectors = ['.apple-home-header.permanent-header', '.permanent-chips'];
+      Array.from(this.content.children).forEach(child => {
+        const isPermanent = permanentSelectors.some(sel => child.matches(sel));
+        if (!isPermanent) child.remove();
+      });
+
+      const permanentChips = this.content.querySelector('.permanent-chips') as HTMLElement;
       if (permanentChips) {
-        this.content.appendChild(permanentChips);
-        this.chipsElement = new AppleChips(permanentChips as HTMLElement, this.customizationManager);
+        this.chipsElement = new AppleChips(permanentChips, this.customizationManager);
         this.setupChipsCallback();
       }
     }
@@ -798,6 +917,7 @@ export class AppleHomeView extends HTMLElement {
             overflow-x: auto;
             overflow-y: hidden;
             margin-bottom: var(--section-margin);
+            contain: layout style;
             margin-inline-start: calc(-1 * var(--apple-page-padding, 22px));
             margin-inline-end: calc(-1 * var(--apple-page-padding, 22px));
             -webkit-overflow-scrolling: touch;
@@ -910,7 +1030,7 @@ export class AppleHomeView extends HTMLElement {
 
           /* Ensure edit mode works properly with carousels */
           .carousel-grid .entity-card-wrapper.edit-mode {
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             animation: apple-home-shake 1.3s ease-in-out infinite;
             touch-action: none;
           }
@@ -922,6 +1042,7 @@ export class AppleHomeView extends HTMLElement {
             grid-auto-rows: var(--apple-card-height, 70px);
             gap: var(--card-gap);
             margin-bottom: var(--section-margin);
+            contain: layout style;
           }
 
           .room-group-grid .entity-card-wrapper,
@@ -973,7 +1094,7 @@ export class AppleHomeView extends HTMLElement {
           }
           
           .entity-card-wrapper.edit-mode {
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             animation: apple-home-shake 1.3s ease-in-out infinite;
             touch-action: none; /* Prevent default touch behaviors for drag */
           }
@@ -1004,7 +1125,7 @@ export class AppleHomeView extends HTMLElement {
           .drag-placeholder {
             background: transparent !important;
             border: none !important;
-            transition: all 0.2s ease !important;
+            transition: opacity 0.2s ease !important;
             pointer-events: none !important;
             min-height: 70px !important;
             position: relative !important;
@@ -1142,7 +1263,7 @@ export class AppleHomeView extends HTMLElement {
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
             backdrop-filter: blur(10px);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
           }
@@ -1792,16 +1913,26 @@ export class AppleHomeView extends HTMLElement {
     
     // Set transition state to prevent concurrent renders
     this._isTransitioning = true;
-    
-    // Add stack trace for debugging (only first few lines)
-    const stack = new Error().stack?.split('\n').slice(1, 4).join('\n');
-    
+
+    // Smooth crossfade on re-renders to avoid visible flash
+    const hasExistingContent = this.content && this.content.children.length > 2;
+
+    // Save scroll position before rebuild
+    const scrollParent = this.getScrollParent();
+    const savedScrollTop = hasExistingContent && scrollParent ? scrollParent.scrollTop : 0;
+
+    if (hasExistingContent) {
+      this.content.style.transition = 'opacity 0.15s ease-out';
+      this.content.style.opacity = '0';
+      await new Promise(r => setTimeout(r, 150));
+    }
+
     // **CRITICAL FIX**: Force complete chips reset when reusing component instance
     this.forceChipsReset();
-    
+
     // Pause cameras before switching pages
     this.pauseCameras();
-    
+
     try {
       if (this.config?.pageType === 'group' && this.config?.deviceGroup) {
         // Configure and render group page
@@ -1874,10 +2005,21 @@ export class AppleHomeView extends HTMLElement {
       }
     } catch (error) {
       console.error('Error rendering page:', error);
+      this._isTransitioning = false;
     }
 
     // Mark as rendered immediately after render logic completes
     this._rendered = true;
+
+    // Fade content back in after rebuild
+    if (this.content) {
+      this.content.style.opacity = '1';
+    }
+
+    // Restore scroll position
+    if (savedScrollTop > 0 && scrollParent) {
+      scrollParent.scrollTop = savedScrollTop;
+    }
 
     // CRITICAL: Ensure chips are recreated and properly configured after page render
     this.ensureChipsExist();
@@ -2119,33 +2261,263 @@ export class AppleHomeView extends HTMLElement {
   }
 
   private async refreshDashboard() {
-    // Skip refresh if we're in edit mode to prevent breaking drag and drop
-    if (this.editModeManager?.editMode) {
-      return;
-    }
-    
-    // Force re-render with updated customizations
-    if (!this._hass) return;
-    
+    if (this.editModeManager?.editMode || !this._hass || !this.content) return;
+
     try {
-      // Get fresh customizations from the manager
-      const freshCustomizations = this.customizationManager.getCustomizations();
-      
-      // Update config with fresh customizations (always update to ensure sync)
-      this.config = {
-        ...this.config,
-        customizations: JSON.parse(JSON.stringify(freshCustomizations)) // Deep clone to ensure change detection works
-      };
-      
-      // Force re-render - the callback was triggered because something changed
-      this._rendered = false;
-      await this.renderPage('refreshCallback');
-      
+      // Snapshot old customizations
+      const oldHome = this.config?.customizations?.home || {};
+
+      // Get fresh customizations
+      const fresh = this.customizationManager.getCustomizations();
+      this.config = { ...this.config, customizations: JSON.parse(JSON.stringify(fresh)) };
+      const newHome = fresh?.home || {};
+
+      let didChange = false;
+
+      // --- Excluded entities ---
+      const toRemove = new Set<string>();
+      const toAdd = new Set<string>();
+      this.diffLists(oldHome.excluded_from_dashboard, newHome.excluded_from_dashboard, toRemove, toAdd);
+      if (!this.config?.pageType || this.config?.pageType === 'home') {
+        this.diffLists(oldHome.excluded_from_home, newHome.excluded_from_home, toRemove, toAdd);
+      }
+      for (const entityId of toRemove) { this.fadeOutCard(entityId); didChange = true; }
+      for (const entityId of toAdd) { this.addCardToDOM(entityId); didChange = true; }
+
+      // --- Favorites ---
+      const oldFav = new Set<string>(oldHome.favorites || []);
+      const newFav = new Set<string>(newHome.favorites || []);
+      const favRemoved = [...oldFav].filter(e => !newFav.has(e));
+      const favAdded = [...newFav].filter(e => !oldFav.has(e));
+
+      // Remove cards from favorites grid
+      const favGrid = this.content.querySelector('.area-entities[data-area-id="favorites"]') as HTMLElement;
+      for (const entityId of favRemoved) {
+        const favCard = favGrid?.querySelector(`.entity-card-wrapper[data-entity-id="${entityId}"]`) as HTMLElement;
+        if (favCard) {
+          favCard.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+          favCard.style.opacity = '0';
+          favCard.style.transform = 'scale(0.8)';
+          setTimeout(() => {
+            favCard.remove();
+            // Clean up empty favorites section
+            if (favGrid && favGrid.children.length === 0) {
+              this.cleanupEmptySection(favGrid);
+            }
+          }, 250);
+          didChange = true;
+        }
+      }
+
+      // Add cards to favorites grid
+      for (const entityId of favAdded) {
+        this.addCardToFavorites(entityId);
+        didChange = true;
+      }
+
+      // --- Switches toggle ---
+      const switchesChanged = oldHome.showSwitches !== newHome.showSwitches;
+      const includedSwitchesChanged = JSON.stringify(oldHome.includedSwitches || []) !== JSON.stringify(newHome.includedSwitches || []);
+      if (switchesChanged || includedSwitchesChanged) {
+        // Switches visibility changed - need rebuild since it affects many cards
+        this._rendered = false;
+        await this.renderPage('refreshCallback');
+        return;
+      }
+
+      // --- Extra accessories ---
+      const oldExtra = new Set<string>(oldHome.extraAccessories || []);
+      const newExtra = new Set<string>(newHome.extraAccessories || []);
+      const extraRemoved = [...oldExtra].filter(e => !newExtra.has(e));
+      const extraAdded = [...newExtra].filter(e => !oldExtra.has(e));
+      for (const entityId of extraRemoved) { this.fadeOutCard(entityId); didChange = true; }
+      for (const entityId of extraAdded) { this.addCardToDOM(entityId); didChange = true; }
+
+      // --- Section order ---
+      const sectionOrderChanged = JSON.stringify(oldHome.sections?.order) !== JSON.stringify(newHome.sections?.order);
+      if (sectionOrderChanged) {
+        this._rendered = false;
+        await this.renderPage('refreshCallback');
+        return;
+      }
+
+      // --- Hidden sections ---
+      const hiddenChanged = JSON.stringify(oldHome.sections?.hidden || []) !== JSON.stringify(newHome.sections?.hidden || []);
+      if (hiddenChanged) {
+        this._rendered = false;
+        await this.renderPage('refreshCallback');
+        return;
+      }
+
+      // If nothing changed at all, no need to do anything
+      if (!didChange) {
+        // Check for any other customization change we didn't handle
+        const oldStr = JSON.stringify(oldHome);
+        const newStr = JSON.stringify(newHome);
+        if (oldStr !== newStr) {
+          this._rendered = false;
+          await this.renderPage('refreshCallback');
+        }
+      }
+
     } catch (error) {
       console.error('Error refreshing dashboard:', error);
-      // Fallback: just re-render existing page
-      this._rendered = false;
-      await this.renderPage('refreshCallback-error');
     }
+  }
+
+  /**
+   * Diff two entity lists to find what was added/removed.
+   * Items added to an exclude list = entities removed from UI.
+   * Items removed from an exclude list = entities added to UI.
+   */
+  private diffLists(
+    oldList: string[] | undefined,
+    newList: string[] | undefined,
+    toRemoveFromUI: Set<string>,
+    toAddToUI: Set<string>
+  ): void {
+    const oldSet = new Set(oldList || []);
+    const newSet = new Set(newList || []);
+    // Newly excluded → remove from UI
+    for (const e of newSet) { if (!oldSet.has(e)) toRemoveFromUI.add(e); }
+    // Newly un-excluded → add to UI
+    for (const e of oldSet) { if (!newSet.has(e)) toAddToUI.add(e); }
+  }
+
+  /**
+   * Create a card element and add it to the correct area grid with fade-in.
+   */
+  private addCardToDOM(entityId: string): void {
+    if (!this._hass || !this.content) return;
+
+    const state = this._hass.states[entityId];
+    if (!state) return;
+
+    // Don't add if already in DOM
+    if (this.content.querySelector(`.entity-card-wrapper[data-entity-id="${entityId}"]`)) return;
+
+    // Determine area
+    const entityReg = this._hass.entities?.[entityId];
+    const areaId = entityReg?.area_id
+      || (entityReg?.device_id ? this._hass.devices?.[entityReg.device_id]?.area_id : null)
+      || 'no_area';
+
+    // Find the area grid
+    const grid = this.content.querySelector(`.area-entities[data-area-id="${areaId}"]`) as HTMLElement;
+    if (!grid) return; // Area not on this page
+
+    // Create card
+    const domain = entityId.split('.')[0];
+    const friendlyName = state.attributes?.friendly_name || entityId.split('.')[1].replace(/_/g, ' ');
+
+    const cardElement = document.createElement('apple-home-card') as any;
+    cardElement.setConfig({
+      type: 'custom:apple-home-card',
+      entity: entityId,
+      name: friendlyName,
+      domain: domain,
+      is_tall: false
+    });
+    cardElement.hass = this._hass;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entity-card-wrapper';
+    wrapper.dataset.entityId = entityId;
+
+    wrapper.appendChild(cardElement);
+
+    // Fade in
+    wrapper.style.opacity = '0';
+    wrapper.style.transform = 'scale(0.8)';
+    grid.appendChild(wrapper);
+
+    requestAnimationFrame(() => {
+      wrapper.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      wrapper.style.opacity = '1';
+      wrapper.style.transform = 'scale(1)';
+    });
+  }
+
+  /**
+   * Add a card to the favorites section, creating the section if needed.
+   */
+  private addCardToFavorites(entityId: string): void {
+    if (!this._hass || !this.content) return;
+
+    const state = this._hass.states[entityId];
+    if (!state) return;
+
+    // Find or create the favorites grid
+    let favGrid = this.content.querySelector('.area-entities[data-area-id="favorites"]') as HTMLElement;
+    if (!favGrid) {
+      // Create the favorites section
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'apple-home-section-title';
+      titleDiv.innerHTML = `<span>${localize('section_titles.favorites')}</span>`;
+
+      favGrid = document.createElement('div');
+      favGrid.className = 'area-entities';
+      favGrid.dataset.areaId = 'favorites';
+
+      // Insert at top of content (after header and chips)
+      const firstSection = this.content.querySelector('.apple-home-section-title, .area-title');
+      if (firstSection) {
+        this.content.insertBefore(favGrid, firstSection);
+        this.content.insertBefore(titleDiv, favGrid);
+      } else {
+        this.content.appendChild(titleDiv);
+        this.content.appendChild(favGrid);
+      }
+    }
+
+    // Don't add if already in favorites grid
+    if (favGrid.querySelector(`.entity-card-wrapper[data-entity-id="${entityId}"]`)) return;
+
+    const domain = entityId.split('.')[0];
+    const friendlyName = state.attributes?.friendly_name || entityId.split('.')[1].replace(/_/g, ' ');
+
+    const cardElement = document.createElement('apple-home-card') as any;
+    cardElement.setConfig({
+      type: 'custom:apple-home-card',
+      entity: entityId,
+      name: friendlyName,
+      domain: domain,
+      is_tall: false
+    });
+    cardElement.hass = this._hass;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entity-card-wrapper';
+    wrapper.dataset.entityId = entityId;
+    wrapper.appendChild(cardElement);
+
+    wrapper.style.opacity = '0';
+    wrapper.style.transform = 'scale(0.8)';
+    favGrid.appendChild(wrapper);
+
+    requestAnimationFrame(() => {
+      wrapper.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      wrapper.style.opacity = '1';
+      wrapper.style.transform = 'scale(1)';
+    });
+  }
+
+  private getScrollParent(): Element | null {
+    let el: Element | null = this;
+    while (el) {
+      // Check host element if inside shadow DOM
+      if (el instanceof ShadowRoot) {
+        el = (el as ShadowRoot).host;
+        continue;
+      }
+      if (el instanceof HTMLElement) {
+        const style = window.getComputedStyle(el);
+        if (/(auto|scroll)/.test(style.overflowY) && el.scrollHeight > el.clientHeight) {
+          return el;
+        }
+      }
+      el = el.parentElement || (el.getRootNode() as ShadowRoot)?.host || null;
+    }
+    return document.scrollingElement || document.documentElement;
   }
 }

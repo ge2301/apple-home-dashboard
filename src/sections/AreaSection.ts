@@ -9,10 +9,22 @@ import { RTLHelper } from '../utils/RTLHelper';
 export class AreaSection {
   private customizationManager: CustomizationManager;
   private cardManager: CardManager;
+  private _areasCache: Area[] | null = null;
+  private _areasCacheHass: any = null;
 
   constructor(customizationManager: CustomizationManager, cardManager?: CardManager) {
     this.customizationManager = customizationManager;
     this.cardManager = cardManager || new CardManager(customizationManager);
+  }
+
+  // Cache areas per hass instance to avoid repeated WS calls within the same render cycle
+  private async getCachedAreas(hass: any): Promise<Area[]> {
+    if (this._areasCache && this._areasCacheHass === hass) {
+      return this._areasCache;
+    }
+    this._areasCache = await DataService.getAreas(hass);
+    this._areasCacheHass = hass;
+    return this._areasCache;
   }
 
   async renderSingleArea(
@@ -25,12 +37,12 @@ export class AreaSection {
     enableNavigation: boolean = true
   ): Promise<void> {
     if (areaEntities.length === 0) return;
-    
-    // Get area name
+
+    // Get area name (cached per render cycle)
     let areaName = areaId;
     if (areaId !== 'no_area') {
       try {
-        const areas = await DataService.getAreas(hass);
+        const areas = await this.getCachedAreas(hass);
         const area = areas.find((a: Area) => a.area_id === areaId);
         areaName = area?.name || areaId;
       } catch (error) {
@@ -97,10 +109,11 @@ export class AreaSection {
     
     // Remove area name from entity name to avoid redundancy
     if (areaName && friendlyName.includes(areaName)) {
+      const escaped = areaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const cleanName = friendlyName
-        .replace(new RegExp(`^${areaName}\\s+`, 'i'), '')
-        .replace(new RegExp(`\\s+${areaName}$`, 'i'), '')
-        .replace(new RegExp(`\\s+${areaName}\\s+`, 'i'), ' ')
+        .replace(new RegExp(`^${escaped}\\s+`, 'i'), '')
+        .replace(new RegExp(`\\s+${escaped}$`, 'i'), '')
+        .replace(new RegExp(`\\s+${escaped}\\s+`, 'i'), ' ')
         .trim();
       
       if (cleanName && cleanName.length > 0 && cleanName.toLowerCase() !== areaName.toLowerCase()) {

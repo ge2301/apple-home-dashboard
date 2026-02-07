@@ -51,25 +51,20 @@ export class ScenesPage {
   ): Promise<void> {
     // Store container reference for use in save methods
     this._container = container;
-    // Preserve existing header and permanent chips elements
-    const existingHeader = container.querySelector('.apple-home-header');
-    const existingPermanentChips = container.querySelector('.permanent-chips');
-    
-    // Clear container but preserve important elements
-    container.innerHTML = '';
-    
-    // Re-insert preserved elements in correct order
-    if (existingHeader) {
-      container.appendChild(existingHeader);
-    }
-    
-    // Add scenes title
+    // Remove only dynamic content, keep permanent elements (header, chips) in place
+    const permanentSelectors = ['.apple-home-header', '.permanent-chips'];
+    Array.from(container.children).forEach(child => {
+      const isPermanent = permanentSelectors.some(sel => child.matches(sel));
+      if (!isPermanent) child.remove();
+    });
+
+    // Add scenes title after header but before chips
     const scenesTitle = this.createScenesTitle();
-    container.appendChild(scenesTitle);
-    
-    // Re-insert permanent chips after title (this ensures chips are always below h1)
+    const existingPermanentChips = container.querySelector('.permanent-chips');
     if (existingPermanentChips) {
-      container.appendChild(existingPermanentChips);
+      container.insertBefore(scenesTitle, existingPermanentChips);
+    } else {
+      container.appendChild(scenesTitle);
     }
 
     try {

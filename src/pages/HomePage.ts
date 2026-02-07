@@ -59,47 +59,48 @@ export class HomePage {
     title: string,
     onTallToggle?: (entityId: string, areaId: string) => void | Promise<void | boolean>
   ): Promise<void> {
-    // Preserve existing header and permanent chips elements
-    const existingHeader = container.querySelector('.apple-home-header');
-    const existingPermanentChips = container.querySelector('.permanent-chips');
-    
-    // Clear container but preserve important elements
-    container.innerHTML = '';
-    
-    // Re-insert preserved elements in correct order
-    if (existingHeader) {
-      container.appendChild(existingHeader);
-    }
-    
-    // Add home title
+    // Remove only dynamic content, keep permanent elements (header, chips) in place
+    const permanentSelectors = ['.apple-home-header', '.permanent-chips'];
+    Array.from(container.children).forEach(child => {
+      const isPermanent = permanentSelectors.some(sel => child.matches(sel));
+      if (!isPermanent) child.remove();
+    });
+
+    // Add home title after header but before chips
     const homeTitle = this.createHomeTitle(title);
-    container.appendChild(homeTitle);
-    
-    // Re-insert permanent chips after title (this ensures chips are always below h1)
+    const existingPermanentChips = container.querySelector('.permanent-chips');
     if (existingPermanentChips) {
-      container.appendChild(existingPermanentChips);
+      container.insertBefore(homeTitle, existingPermanentChips);
+    } else {
+      container.appendChild(homeTitle);
     }
 
     try {
-      // Get data from Home Assistant
-      const areas = await DataService.getAreas(hass);
-      const entities = await DataService.getEntities(hass);
-      const devices = await DataService.getDevices(hass);
-      
-      // Get showSwitches, includedSwitches, and extraAccessories settings
-      const showSwitches = await this.customizationManager?.getShowSwitches() || false;
-      const includedSwitches = await this.customizationManager?.getIncludedSwitches() || [];
-      const extraAccessories = await this.customizationManager?.getExtraAccessories() || [];
+      // Fetch all data in parallel
+      const [areas, entities, devices, showSwitches, includedSwitches, extraAccessories] = await Promise.all([
+        DataService.getAreas(hass),
+        DataService.getEntities(hass),
+        DataService.getDevices(hass),
+        this.customizationManager?.getShowSwitches().then(v => v || false) ?? Promise.resolve(false),
+        this.customizationManager?.getIncludedSwitches().then(v => v || []) ?? Promise.resolve([] as string[]),
+        this.customizationManager?.getExtraAccessories().then(v => v || []) ?? Promise.resolve([] as string[])
+      ]);
       
       // Filter entities for supported domains and exclude those marked for exclusion
       const supportedEntities = entities.filter(entity => {
         const domain = entity.entity_id.split('.')[0];
-        
+
         // Check if this entity is in the extraAccessories list (manually added entities)
         if (extraAccessories.includes(entity.entity_id)) {
           return true;
         }
-        
+
+        // Exclude configuration and diagnostic entities from auto-discovery
+        // These should only be included via custom entities (extra accessories)
+        if (entity.entity_category === 'config' || entity.entity_category === 'diagnostic') {
+          return false;
+        }
+
         if (!DashboardConfig.isSupportedDomain(domain)) {
           return false;
         }
@@ -123,32 +124,26 @@ export class HomePage {
         return true;
       });
 
-      // Now apply exclusions asynchronously
-      const filteredEntities = [];
-      for (const entity of supportedEntities) {
-        const isExcluded = await this.customizationManager?.isEntityExcludedFromDashboard(entity.entity_id) || false;
-        if (!isExcluded) {
-          filteredEntities.push(entity);
-        }
-      }
-      
+      // Batch-fetch exclusion lists once, then filter synchronously
+      const excludedFromDashboard = new Set(await this.customizationManager?.getExcludedFromDashboard() || []);
+      const excludedFromHome = new Set(await this.customizationManager?.getExcludedFromHome() || []);
+
+      const filteredEntities = supportedEntities.filter(entity => !excludedFromDashboard.has(entity.entity_id));
+
       // Separate special section entities from regular area entities
-      const scenesEntities = [];
-      const camerasEntities = [];
-      const regularEntities = [];
+      const scenesEntities: typeof filteredEntities = [];
+      const camerasEntities: typeof filteredEntities = [];
+      const regularEntities: typeof filteredEntities = [];
 
       for (const entity of filteredEntities) {
+        if (excludedFromHome.has(entity.entity_id)) continue;
         const domain = entity.entity_id.split('.')[0];
-        const isExcludedFromHome = await this.customizationManager?.isEntityExcludedFromHome(entity.entity_id) || false;
-        
-        if (!isExcludedFromHome) {
-          if (DashboardConfig.isScenesDomain(domain)) {
-            scenesEntities.push(entity);
-          } else if (DashboardConfig.isCamerasDomain(domain)) {
-            camerasEntities.push(entity);
-          } else if (!DashboardConfig.isSpecialSectionDomain(domain)) {
-            regularEntities.push(entity);
-          }
+        if (DashboardConfig.isScenesDomain(domain)) {
+          scenesEntities.push(entity);
+        } else if (DashboardConfig.isCamerasDomain(domain)) {
+          camerasEntities.push(entity);
+        } else if (!DashboardConfig.isSpecialSectionDomain(domain)) {
+          regularEntities.push(entity);
         }
       }
       

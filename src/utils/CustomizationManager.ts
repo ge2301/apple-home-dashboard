@@ -401,20 +401,26 @@ export class CustomizationManager {
       // Set up interval to detect and close dashboard notifications
       let attempts = 0;
       const maxAttempts = 100; // Check for 10 seconds
-      
+
       const checkInterval = setInterval(() => {
         attempts++;
-        
+
         // Find and close the toast using the working method
         const toast = document.querySelector("home-assistant")?.shadowRoot
           ?.querySelector("notification-manager")?.shadowRoot
           ?.querySelector("ha-toast") as any;
-        
+
         if (toast && typeof toast.close === 'function') {
           toast.close();
           clearInterval(checkInterval);
+          // Remove the injected hide style so other HA notifications work
+          const injectedStyle = nm.shadowRoot?.getElementById('apple-home-dashboard-hide');
+          if (injectedStyle) injectedStyle.remove();
         } else if (attempts >= maxAttempts) {
           clearInterval(checkInterval);
+          // Remove the injected hide style even on timeout
+          const injectedStyle = nm.shadowRoot?.getElementById('apple-home-dashboard-hide');
+          if (injectedStyle) injectedStyle.remove();
         }
       }, 100);
     });
@@ -673,10 +679,7 @@ export class CustomizationManager {
   }
 
   isDashboardCurrentlyActive(): boolean {
-    // Delegate to DashboardStateManager for accurate state
-    return import('./DashboardStateManager').then(({ DashboardStateManager }) => {
-      return DashboardStateManager.getInstance().isDashboardActive();
-    }) as unknown as boolean;
+    return DashboardStateManager.getInstance().isDashboardActive();
   }
 
   getDashboardUrl(): string | null {

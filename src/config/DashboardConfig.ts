@@ -53,7 +53,14 @@ const CLIMATE_MODE_COLORS = {
   heat_cool: '#34c759',
   dry: '#466680',
   fan_only: '#000000',
-  off: '#ffffff'
+  off: '#ffffff',
+  // Water heater modes
+  eco: '#34c759',
+  electric: '#ff8d13',
+  performance: '#ff8d13',
+  high_demand: '#ff8d13',
+  heat_pump: '#ff8d13',
+  gas: '#ff8d13'
 };
 
 export class DashboardConfig {
@@ -119,7 +126,8 @@ export class DashboardConfig {
     'camera': DeviceGroup.SECURITY,
     'binary_sensor': DeviceGroup.SECURITY, // Motion, occupancy, contact sensors
     'sensor': DeviceGroup.SECURITY,
-    'vacuum': DeviceGroup.VACUUM // Robot vacuums
+    'vacuum': DeviceGroup.VACUUM, // Robot vacuums
+    'water_heater': DeviceGroup.CLIMATE // Water heaters, heat pumps, boilers
   };
 
   // =====================================================================
@@ -130,8 +138,8 @@ export class DashboardConfig {
    * Supported domains for the main dashboard
    */
   static readonly SUPPORTED_DOMAINS = [
-    'light', 'switch', 'cover', 'climate', 'fan', 'media_player', 
-    'lock', 'alarm_control_panel', 'scene', 'script', 'camera', 'vacuum'
+    'light', 'switch', 'cover', 'climate', 'fan', 'media_player',
+    'lock', 'alarm_control_panel', 'scene', 'script', 'camera', 'vacuum', 'water_heater'
   ] as const;
 
   /**
@@ -154,7 +162,7 @@ export class DashboardConfig {
   /**
    * Domains that should be displayed as tall cards by default
    */
-  static readonly DEFAULT_TALL_DOMAINS = ['climate', 'lock', 'alarm_control_panel', 'camera', 'vacuum'] as const;
+  static readonly DEFAULT_TALL_DOMAINS = ['climate', 'lock', 'alarm_control_panel', 'camera', 'vacuum', 'water_heater'] as const;
 
   // =====================================================================
   // STYLING CONSTANTS
@@ -427,6 +435,8 @@ export class DashboardConfig {
         return entityState === 'open' ? 'mdi:window-shutter-open' : 'mdi:window-shutter';
       case 'climate':
         return 'mdi:thermostat';
+      case 'water_heater':
+        return 'mdi:water-boiler';
       case 'fan':
         return 'mdi:fan';
       case 'media_player':
@@ -453,7 +463,8 @@ export class DashboardConfig {
    * Climate uses mode-specific colors but follows same icon/background logic
    */
   private static applyClimateStyling(entityState: string, isActive: boolean): Partial<EntityData> {
-    const climateColor = (CLIMATE_MODE_COLORS as any)[entityState] || CLIMATE_MODE_COLORS.off;
+    // Use known mode color, or fall back to heat orange for active / white for off
+    const climateColor = (CLIMATE_MODE_COLORS as any)[entityState] || (isActive ? CLIMATE_MODE_COLORS.heat : CLIMATE_MODE_COLORS.off);
     
     if (isActive) {
       // Active climate: white icon, colored background (but transparent for climate)
@@ -531,8 +542,8 @@ export class DashboardConfig {
 
     // Apply styling based on domain and state
     let styling: Partial<EntityData>;
-    if (domain === 'climate') {
-      // Climate domain uses special mode-based colors
+    if (domain === 'climate' || domain === 'water_heater') {
+      // Climate and water_heater domains use special mode-based colors
       styling = this.applyClimateStyling(entityState, isActive);
     } else if (isActive && deviceGroup) {
       // Use group-based styling for active devices
@@ -576,6 +587,7 @@ export class DashboardConfig {
         result = entityState === 'open' || entityState === 'opening';
         break;
       case 'climate':
+      case 'water_heater':
         result = entityState !== 'off';
         break;
       case 'media_player':
@@ -648,6 +660,9 @@ export class DashboardConfig {
       case 'climate':
         return this.getClimateStateText(entityState, attributes, hass);
 
+      case 'water_heater':
+        return this.getWaterHeaterStateText(entityState, attributes, hass);
+
       case 'fan':
         if (entityState === 'on' && attributes.percentage && typeof attributes.percentage === 'number') {
           return `${attributes.percentage}%`;
@@ -719,6 +734,31 @@ export class DashboardConfig {
       default:
         return entityState.charAt(0).toUpperCase() + entityState.slice(1);
     }
+  }
+
+  /**
+   * Get water heater-specific state text
+   */
+  private static getWaterHeaterStateText(entityState: string, attributes: any, hass?: any): string {
+    const targetTemp = attributes.temperature;
+    const tempUnit = attributes.unit_of_measurement || hass?.config?.unit_system?.temperature || '°C';
+
+    if (entityState === 'off') {
+      return localize('status.off');
+    }
+
+    // Handle boolean-like or unknown states from some integrations
+    const lowerState = entityState.toLowerCase();
+    const isGenericOn = lowerState === 'true' || lowerState === 'on';
+    const modeLabel = isGenericOn
+      ? localize('status.on')
+      : entityState.charAt(0).toUpperCase() + entityState.slice(1).replace(/_/g, ' ');
+
+    if (targetTemp) {
+      return `${modeLabel} · ${targetTemp}${tempUnit}`;
+    }
+
+    return modeLabel;
   }
 
   /**

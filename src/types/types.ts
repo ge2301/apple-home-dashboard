@@ -50,6 +50,7 @@ export interface Entity {
   device_id?: string;
   hidden_by?: string | null;
   disabled_by?: string | null;
+  entity_category?: string | null;
 }
 
 export interface Device {

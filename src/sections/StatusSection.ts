@@ -210,7 +210,7 @@ export class StatusSection {
     else if (domain === 'sensor' && (deviceClass === 'temperature' || state.attributes?.unit_of_measurement === '°C' || state.attributes?.unit_of_measurement === '°F')) {
       statusMap.get('temperature')?.entityIds.push(entityId);
     }
-    else if (domain === 'climate') {
+    else if (domain === 'climate' || domain === 'water_heater') {
       statusMap.get('temperature')?.entityIds.push(entityId);
     }
     
@@ -388,7 +388,7 @@ export class StatusSection {
         temp = parseFloat(state.state);
       }
       
-      if (temp !== undefined && !isNaN(temp) && temp > -100 && temp < 200) { // Reasonable temperature range
+      if (typeof temp === 'number' && !isNaN(temp) && temp > -100 && temp < 200) { // Reasonable temperature range
         temperatures.push(temp);
       }
     });
@@ -475,7 +475,7 @@ export class StatusSection {
           color: white;
           font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
           user-select: none;
           -webkit-user-select: none;
           -webkit-tap-highlight-color: transparent;
@@ -1168,9 +1168,9 @@ export class StatusSection {
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         transform: scale(0.9);
         opacity: 0;
-        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       }
-      
+
       .status-modal-backdrop.show .status-modal-content {
         transform: scale(1);
         opacity: 1;

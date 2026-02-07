@@ -103,68 +103,62 @@ export class GroupPage {
     hass: any,
     onTallToggle?: (entityId: string, areaId: string) => void | Promise<void | boolean>
   ): Promise<void> {
-    // Preserve existing header and permanent chips elements
-    const existingHeader = container.querySelector('.apple-home-header');
-    const existingPermanentChips = container.querySelector('.permanent-chips');
-    
-    // Clear container but preserve important elements
-    container.innerHTML = '';
-    
-    // Re-insert preserved elements in correct order
-    if (existingHeader) {
-      container.appendChild(existingHeader);
-    }
-    
-    // Add group title
+    // Remove only dynamic content, keep permanent elements (header, chips) in place
+    const permanentSelectors = ['.apple-home-header', '.permanent-chips'];
+    Array.from(container.children).forEach(child => {
+      const isPermanent = permanentSelectors.some(sel => child.matches(sel));
+      if (!isPermanent) child.remove();
+    });
+
+    // Add group title after header but before chips
     const groupTitle = this.createGroupTitle(group);
-    container.appendChild(groupTitle);
-    
-    // Re-insert permanent chips after title (this ensures chips are always below h1)
+    const existingPermanentChips = container.querySelector('.permanent-chips');
     if (existingPermanentChips) {
-      container.appendChild(existingPermanentChips);
+      container.insertBefore(groupTitle, existingPermanentChips);
+    } else {
+      container.appendChild(groupTitle);
     }
 
     try {
-      // Get data from Home Assistant
-      const areas = await DataService.getAreas(hass);
-      const entities = await DataService.getEntities(hass);
-      const devices = await DataService.getDevices(hass);
+      // Fetch all data in parallel
+      const [areas, entities, devices] = await Promise.all([
+        DataService.getAreas(hass),
+        DataService.getEntities(hass),
+        DataService.getDevices(hass)
+      ]);
       
       // Get hidden sections (areas) for filtering
       const hiddenSections = this.customizationManager?.getHiddenSections() || [];
       
       // Filter entities for supported domains and exclude those marked for exclusion
       const supportedEntities = entities.filter(entity => {
+        // Exclude configuration and diagnostic entities from auto-discovery
+        if (entity.entity_category === 'config' || entity.entity_category === 'diagnostic') {
+          return false;
+        }
         const domain = entity.entity_id.split('.')[0];
         return DashboardConfig.isSupportedDomain(domain);
       });
 
       // Create a separate list for status section that includes sensor domains
       const statusEntities = entities.filter(entity => {
+        // Exclude configuration and diagnostic entities from auto-discovery
+        if (entity.entity_category === 'config' || entity.entity_category === 'diagnostic') {
+          return false;
+        }
         const domain = entity.entity_id.split('.')[0];
         return DashboardConfig.isStatusDomain(domain);
       });
 
-      // Now apply exclusions asynchronously to both lists
-      // Also filter out entities from hidden areas
-      const filteredEntities = [];
-      const filteredStatusEntities = [];
-      
-      for (const entity of supportedEntities) {
-        const isExcluded = await this.customizationManager?.isEntityExcludedFromDashboard(entity.entity_id) || false;
-        const isInHiddenArea = this.isEntityInHiddenArea(entity, devices, hiddenSections);
-        if (!isExcluded && !isInHiddenArea) {
-          filteredEntities.push(entity);
-        }
-      }
-      
-      for (const entity of statusEntities) {
-        const isExcluded = await this.customizationManager?.isEntityExcludedFromDashboard(entity.entity_id) || false;
-        const isInHiddenArea = this.isEntityInHiddenArea(entity, devices, hiddenSections);
-        if (!isExcluded && !isInHiddenArea) {
-          filteredStatusEntities.push(entity);
-        }
-      }
+      // Batch-fetch exclusion list once, then filter synchronously
+      const excludedFromDashboard = new Set(await this.customizationManager?.getExcludedFromDashboard() || []);
+
+      const filteredEntities = supportedEntities.filter(entity =>
+        !excludedFromDashboard.has(entity.entity_id) && !this.isEntityInHiddenArea(entity, devices, hiddenSections)
+      );
+      const filteredStatusEntities = statusEntities.filter(entity =>
+        !excludedFromDashboard.has(entity.entity_id) && !this.isEntityInHiddenArea(entity, devices, hiddenSections)
+      );
       
       // Get all special section entities
       const scenesEntities = filteredEntities.filter(entity => 

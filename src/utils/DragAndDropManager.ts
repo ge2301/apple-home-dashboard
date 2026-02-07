@@ -661,8 +661,9 @@ export class DragAndDropManager {
       },
       
       onEnd: (evt) => {
+        DragAndDropManager.isReordering = false;
         evt.item.classList.remove('dragging');
-        
+
         // Stop smooth scrolling
         stopScrolling();
         

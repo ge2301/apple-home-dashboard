@@ -52,25 +52,20 @@ export class CamerasPage {
     // Store the container reference
     this._container = container;
     
-    // Preserve existing header and permanent chips elements
-    const existingHeader = container.querySelector('.apple-home-header');
-    const existingPermanentChips = container.querySelector('.permanent-chips');
-    
-    // Clear container but preserve important elements
-    container.innerHTML = '';
-    
-    // Re-insert preserved elements in correct order
-    if (existingHeader) {
-      container.appendChild(existingHeader);
-    }
-    
-    // Add cameras title
+    // Remove only dynamic content, keep permanent elements (header, chips) in place
+    const permanentSelectors = ['.apple-home-header', '.permanent-chips'];
+    Array.from(container.children).forEach(child => {
+      const isPermanent = permanentSelectors.some(sel => child.matches(sel));
+      if (!isPermanent) child.remove();
+    });
+
+    // Add cameras title after header but before chips
     const camerasTitle = this.createCamerasTitle();
-    container.appendChild(camerasTitle);
-    
-    // Re-insert permanent chips after title (this ensures chips are always below h1)
+    const existingPermanentChips = container.querySelector('.permanent-chips');
     if (existingPermanentChips) {
-      container.appendChild(existingPermanentChips);
+      container.insertBefore(camerasTitle, existingPermanentChips);
+    } else {
+      container.appendChild(camerasTitle);
     }
 
     try {
