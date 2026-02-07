@@ -5,6 +5,7 @@ import { ScenesSection } from '../sections/ScenesSection';
 import { CamerasSection } from '../sections/CamerasSection';
 import { AreaSection } from '../sections/AreaSection';
 import { StatusSection } from '../sections/StatusSection';
+import { WeatherSection } from '../sections/WeatherSection';
 import { Entity } from '../types/types';
 
 export class GroupPage {
@@ -13,6 +14,7 @@ export class GroupPage {
   private camerasSection?: CamerasSection;
   private areaSection?: AreaSection;
   private statusSection?: StatusSection;
+  private weatherSection?: WeatherSection;
   private _hass?: any;
   private _group?: DeviceGroup;
   private _config?: any;
@@ -52,6 +54,7 @@ export class GroupPage {
       this.camerasSection = new CamerasSection(this.customizationManager);
       this.areaSection = new AreaSection(this.customizationManager);
       this.statusSection = new StatusSection(this.customizationManager);
+      this.weatherSection = new WeatherSection(this.customizationManager);
     }
   }
 
@@ -320,14 +323,24 @@ export class GroupPage {
     if (!this.customizationManager || !this.scenesSection || !this.camerasSection || !this.areaSection) {
       throw new Error('Required sections not initialized');
     }
-    
+
     // Get section order and hidden sections
     const sectionOrder = this.customizationManager.getSavedSectionOrder();
     const hiddenSections = this.customizationManager.getHiddenSections();
-    
+
     // Create a map of all available sections
     const availableSections = new Map<string, () => Promise<void>>();
-    
+
+    // Add weather section for climate group if configured
+    if (this._group === DeviceGroup.CLIMATE && this.weatherSection) {
+      const weatherEntity = await this.customizationManager?.getWeatherEntity();
+      if (weatherEntity && hass.states[weatherEntity]) {
+        availableSections.set('weather_section', async () => {
+          await this.weatherSection!.render(container, hass);
+        });
+      }
+    }
+
     // Add scenes section if there are any scenes or scripts
     if (scenesEntities.length > 0) {
       availableSections.set('scenes_section', async () => {
@@ -361,12 +374,18 @@ export class GroupPage {
       // Add any new sections that weren't in the saved order
       for (const sectionId of availableSections.keys()) {
         if (!orderedSectionIds.includes(sectionId)) {
-          orderedSectionIds.push(sectionId);
+          if (sectionId === 'weather_section') {
+            orderedSectionIds.unshift(sectionId);
+          } else {
+            orderedSectionIds.push(sectionId);
+          }
         }
       }
     } else {
-      // Default order: cameras, scenes, then areas alphabetically
+      // Default order: weather, cameras, scenes, then areas alphabetically
       orderedSectionIds = Array.from(availableSections.keys()).sort((a, b) => {
+        if (a === 'weather_section') return -1;
+        if (b === 'weather_section') return 1;
         if (a === 'cameras_section') return -1;
         if (b === 'cameras_section') return 1;
         if (a === 'scenes_section') return -1;

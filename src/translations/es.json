@@ -121,9 +121,10 @@
   },
   "section_titles": {
     "default_room": "Habitación Predeterminada",
-    "favorites": "Favoritos", 
+    "favorites": "Favoritos",
     "scenes": "Escenas",
-    "cameras": "Cámaras"
+    "cameras": "Cámaras",
+    "weather": "Clima"
   },
   "ui_actions": {
     "done": "Hecho",
@@ -240,10 +241,37 @@
     "search_accessories": "Buscar accesorios...",
     "search_switches": "Buscar interruptores...",
     "hide_ha_header": "Ocultar Encabezado de Home Assistant",
-    "hide_ha_sidebar": "Ocultar Barra Lateral de Home Assistant"
+    "hide_ha_sidebar": "Ocultar Barra Lateral de Home Assistant",
+    "weather_entity": "Entidad del clima",
+    "search_weather_entity": "Buscar entidades del clima...",
+    "weather_entity_description": "Selecciona una entidad del clima para mostrar una sección del clima en la pantalla de inicio"
   },
   "status_messages": {
     "unavailable": "No disponible",
     "loading_automations": "Cargando Automatizaciones..."
+  },
+  "weather": {
+    "unavailable": "Clima no disponible",
+    "humidity": "Humedad",
+    "wind": "Viento",
+    "high": "H",
+    "low": "L",
+    "conditions": {
+      "sunny": "Soleado",
+      "clear-night": "Despejado",
+      "cloudy": "Nublado",
+      "partlycloudy": "Parcialmente nublado",
+      "rainy": "Lluvioso",
+      "pouring": "Aguacero",
+      "snowy": "Nevado",
+      "snowy-rainy": "Aguanieve",
+      "fog": "Niebla",
+      "hail": "Granizo",
+      "lightning": "Relámpago",
+      "lightning-rainy": "Tormenta",
+      "windy": "Ventoso",
+      "windy-variant": "Ventoso",
+      "exceptional": "Excepcional"
+    }
   }
 }

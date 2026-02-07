@@ -11,6 +11,7 @@ export interface HomeSettingsData {
   excludedFromHome: string[];
   includedSwitches: string[];
   extraAccessories: string[];
+  weatherEntity?: string;
   backgroundType: 'preset' | 'custom';
   customBackground?: string;
   presetBackground?: string;
@@ -31,6 +32,7 @@ export class HomeSettingsManager {
     excludedFromHome: [],
     includedSwitches: [],
     extraAccessories: [],
+    weatherEntity: undefined,
     backgroundType: 'preset',
     presetBackground: BackgroundManager.DEFAULT_BACKGROUND,
     showSwitches: false
@@ -41,6 +43,7 @@ export class HomeSettingsManager {
     excludedFromHome: [],
     includedSwitches: [],
     extraAccessories: [],
+    weatherEntity: undefined,
     backgroundType: 'preset',
     presetBackground: BackgroundManager.DEFAULT_BACKGROUND,
     showSwitches: false
@@ -76,6 +79,7 @@ export class HomeSettingsManager {
       excludedFromHome: customizations.home?.excluded_from_home || [],
       includedSwitches: customizations.home?.included_switches || [],
       extraAccessories: customizations.home?.extra_accessories || [],
+      weatherEntity: customizations.home?.weather_entity || undefined,
       backgroundType: currentBackground.type,
       customBackground: currentBackground.type === 'custom' ? currentBackground.backgroundImage : undefined,
       presetBackground: currentBackground.type === 'preset' ? currentBackground.backgroundImage : BackgroundManager.DEFAULT_BACKGROUND,
@@ -91,6 +95,7 @@ export class HomeSettingsManager {
       excludedFromHome: [...this.settings.excludedFromHome],
       includedSwitches: [...this.settings.includedSwitches],
       extraAccessories: [...this.settings.extraAccessories],
+      weatherEntity: this.settings.weatherEntity,
       backgroundType: this.settings.backgroundType,
       customBackground: this.settings.customBackground,
       presetBackground: this.settings.presetBackground,
@@ -313,6 +318,22 @@ export class HomeSettingsManager {
       </div>
 
       <div class="settings-section">
+        <h3 class="settings-section-header">${localize('settings.weather_entity')}</h3>
+        <div class="settings-card">
+          <div class="entity-selector" data-setting="weatherEntity">
+            <div class="autocomplete-container">
+              <input type="text" class="autocomplete-input" placeholder="${localize('settings.search_weather_entity')}" />
+              <div class="autocomplete-results"></div>
+            </div>
+            <div class="selected-entities">
+              ${this.renderSelectedWeatherEntity(this.tempSettings.weatherEntity)}
+            </div>
+          </div>
+        </div>
+        <p class="settings-section-description">${localize('settings.weather_entity_description')}</p>
+      </div>
+
+      <div class="settings-section">
         <h3 class="settings-section-header">${localize('settings.home_wallpaper')}</h3>
         <div class="settings-card">
           <div class="wallpaper-options">
@@ -399,6 +420,18 @@ export class HomeSettingsManager {
         </div>
       `;
     }).join('');
+  }
+
+  private renderSelectedWeatherEntity(entityId?: string): string {
+    if (!entityId) return '';
+    const state = this.hass?.states?.[entityId];
+    const friendlyName = state?.attributes?.friendly_name || entityId;
+    return `
+      <div class="selected-entity-chip" data-entity-id="${entityId}">
+        <span class="entity-name">${friendlyName}</span>
+        <ha-icon icon="mdi:close" class="remove-entity"></ha-icon>
+      </div>
+    `;
   }
 
   private addModalStyles() {
@@ -955,10 +988,22 @@ export class HomeSettingsManager {
 
   private showAutocompleteResults(query: string, resultsContainer: HTMLElement, setting: keyof HomeSettingsData) {
     const alreadySelected = this.tempSettings[setting];
-    
+
     // Use the appropriate entity list based on setting type
     let entityList: any[];
-    if (setting === 'extraAccessories') {
+    if (setting === 'weatherEntity') {
+      // For weather entity, show all weather.* entities from hass.states
+      entityList = Object.values(this.hass.states)
+        .filter((state: any) => state.entity_id.startsWith('weather.'))
+        .map((state: any) => ({
+          entity_id: state.entity_id,
+          friendly_name: state.attributes.friendly_name || state.entity_id,
+          domain: 'weather',
+          state: state.state,
+          attributes: state.attributes,
+        }))
+        .sort((a, b) => a.friendly_name.localeCompare(b.friendly_name));
+    } else if (setting === 'extraAccessories') {
       entityList = this.allEntitiesForInclusion;
     } else if (setting === 'favoriteAccessories' || setting === 'excludedFromDashboard' || setting === 'excludedFromHome') {
       // For favorites and exclude lists, include both available entities AND extra accessories
@@ -972,10 +1017,12 @@ export class HomeSettingsManager {
     
     // Filter entities based on query and exclude already selected ones
     let filteredEntities = entityList.filter(entity => {
-      const matchesQuery = query === '' || 
+      const matchesQuery = query === '' ||
         entity.friendly_name.toLowerCase().includes(query) ||
         entity.entity_id.toLowerCase().includes(query);
-      const notSelected = !Array.isArray(alreadySelected) || !alreadySelected.includes(entity.entity_id);
+      const notSelected = setting === 'weatherEntity'
+        ? entity.entity_id !== alreadySelected
+        : (!Array.isArray(alreadySelected) || !alreadySelected.includes(entity.entity_id));
       
       // Exclude cameras from favorites
       if (setting === 'favoriteAccessories' && entity.domain === 'camera') {
@@ -1097,6 +1144,11 @@ export class HomeSettingsManager {
   }
 
   private addEntityToSetting(entityId: string, setting: keyof HomeSettingsData) {
+    if (setting === 'weatherEntity') {
+      this.tempSettings.weatherEntity = entityId;
+      this.updateSelectedEntitiesDisplay(setting);
+      return;
+    }
     const settingValue = this.tempSettings[setting];
     if (Array.isArray(settingValue) && !settingValue.includes(entityId)) {
       settingValue.push(entityId);
@@ -1105,6 +1157,11 @@ export class HomeSettingsManager {
   }
 
   private removeEntityFromSetting(entityId: string, setting: keyof HomeSettingsData) {
+    if (setting === 'weatherEntity') {
+      this.tempSettings.weatherEntity = undefined;
+      this.updateSelectedEntitiesDisplay(setting);
+      return;
+    }
     const settingValue = this.tempSettings[setting];
     if (Array.isArray(settingValue)) {
       const index = settingValue.indexOf(entityId);
@@ -1119,6 +1176,11 @@ export class HomeSettingsManager {
     const selector = this.modal?.querySelector(`[data-setting="${setting}"]`);
     const selectedContainer = selector?.querySelector('.selected-entities');
     if (selectedContainer) {
+      if (setting === 'weatherEntity') {
+        selectedContainer.innerHTML = this.renderSelectedWeatherEntity(this.tempSettings.weatherEntity);
+        this.setupRemoveButtons();
+        return;
+      }
       const settingValue = this.tempSettings[setting];
       if (Array.isArray(settingValue)) {
         // Use the appropriate render method for extra accessories
@@ -1189,13 +1251,14 @@ export class HomeSettingsManager {
     }
 
     // Check if changes require a full re-render (entity list changes) vs just DOM updates (UI/background)
-    this.requiresRender = 
+    this.requiresRender =
       JSON.stringify(this.settings.favoriteAccessories) !== JSON.stringify(this.tempSettings.favoriteAccessories) ||
       JSON.stringify(this.settings.excludedFromDashboard) !== JSON.stringify(this.tempSettings.excludedFromDashboard) ||
       JSON.stringify(this.settings.excludedFromHome) !== JSON.stringify(this.tempSettings.excludedFromHome) ||
       JSON.stringify(this.settings.includedSwitches) !== JSON.stringify(this.tempSettings.includedSwitches) ||
       JSON.stringify(this.settings.extraAccessories) !== JSON.stringify(this.tempSettings.extraAccessories) ||
-      this.settings.showSwitches !== this.tempSettings.showSwitches;
+      this.settings.showSwitches !== this.tempSettings.showSwitches ||
+      this.settings.weatherEntity !== this.tempSettings.weatherEntity;
     
     // Apply temporary settings to actual settings
     this.settings.favoriteAccessories = [...this.tempSettings.favoriteAccessories];
@@ -1203,6 +1266,7 @@ export class HomeSettingsManager {
     this.settings.excludedFromHome = [...this.tempSettings.excludedFromHome];
     this.settings.includedSwitches = [...this.tempSettings.includedSwitches];
     this.settings.extraAccessories = [...this.tempSettings.extraAccessories];
+    this.settings.weatherEntity = this.tempSettings.weatherEntity;
     this.settings.backgroundType = this.tempSettings.backgroundType;
     this.settings.customBackground = this.tempSettings.customBackground;
     this.settings.presetBackground = this.tempSettings.presetBackground;
@@ -1272,6 +1336,7 @@ export class HomeSettingsManager {
     home.excluded_from_home = this.settings.excludedFromHome;
     home.included_switches = this.settings.includedSwitches;
     home.extra_accessories = this.settings.extraAccessories;
+    home.weather_entity = this.settings.weatherEntity;
     home.show_switches = this.settings.showSwitches;
     
     const ui = this.customizationManager.getCustomization('ui') || {};

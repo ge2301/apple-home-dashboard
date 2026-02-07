@@ -661,6 +661,12 @@ export class CustomizationManager {
     return homeData.extra_accessories || [];
   }
 
+  async getWeatherEntity(): Promise<string | undefined> {
+    await this.ensureCustomizationsLoaded();
+    const homeData = this.getCustomization('home');
+    return homeData.weather_entity || undefined;
+  }
+
   // Dashboard state tracking methods - delegate to DashboardStateManager
   setDashboardActive(isActive: boolean): void {
     // This method is now just for backward compatibility

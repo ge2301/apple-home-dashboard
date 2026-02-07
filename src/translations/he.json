@@ -121,8 +121,9 @@
   "section_titles": {
     "default_room": "חדר עיקרי",
     "favorites": "מועדפים",
-    "scenes": "תרחישים", 
-    "cameras": "מצלמות"
+    "scenes": "תרחישים",
+    "cameras": "מצלמות",
+    "weather": "מזג אוויר"
   },
   "ui_actions": {
     "done": "סיום",
@@ -239,10 +240,37 @@
     "search_accessories": "חפש אביזרים...",
     "search_switches": "חפש מתגים...",
     "hide_ha_header": "הסתר את הפס העליון של Home Assistant",
-    "hide_ha_sidebar": "הסתר את תפריט הצד של Home Assistant"
+    "hide_ha_sidebar": "הסתר את תפריט הצד של Home Assistant",
+    "weather_entity": "ישות מזג אוויר",
+    "search_weather_entity": "חיפוש ישויות מזג אוויר...",
+    "weather_entity_description": "בחר ישות מזג אוויר כדי להציג מדור מזג אוויר במסך הבית"
   },
   "status_messages": {
     "unavailable": "לא זמין",
     "loading_automations": "טוען אוטומציות..."
+  },
+  "weather": {
+    "unavailable": "מזג אוויר לא זמין",
+    "humidity": "לחות",
+    "wind": "רוח",
+    "high": "ג",
+    "low": "נ",
+    "conditions": {
+      "sunny": "שמשי",
+      "clear-night": "בהיר",
+      "cloudy": "מעונן",
+      "partlycloudy": "מעונן חלקית",
+      "rainy": "גשום",
+      "pouring": "גשם זלעפות",
+      "snowy": "שלג",
+      "snowy-rainy": "שלג וגשם",
+      "fog": "ערפל",
+      "hail": "ברד",
+      "lightning": "ברק",
+      "lightning-rainy": "סופת רעמים",
+      "windy": "סוער",
+      "windy-variant": "סוער",
+      "exceptional": "חריג"
+    }
   }
 }

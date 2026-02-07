@@ -124,7 +124,8 @@
     "default_room": "Комната по Умолчанию",
     "favorites": "Избранное",
     "scenes": "Сцены",
-    "cameras": "Камеры"
+    "cameras": "Камеры",
+    "weather": "Погода"
   },
   "ui_actions": {
     "done": "Готово",
@@ -241,10 +242,37 @@
     "search_accessories": "Поиск аксессуаров...",
     "search_switches": "Поиск переключателей...",
     "hide_ha_header": "Скрыть заголовок Home Assistant",
-    "hide_ha_sidebar": "Скрыть боковую панель Home Assistant"
+    "hide_ha_sidebar": "Скрыть боковую панель Home Assistant",
+    "weather_entity": "Объект погоды",
+    "search_weather_entity": "Поиск объектов погоды...",
+    "weather_entity_description": "Выберите объект погоды для отображения раздела погоды на главном экране"
   },
   "status_messages": {
     "unavailable": "Недоступно",
     "loading_automations": "Загрузка Автоматизаций..."
+  },
+  "weather": {
+    "unavailable": "Погода недоступна",
+    "humidity": "Влажность",
+    "wind": "Ветер",
+    "high": "В",
+    "low": "Н",
+    "conditions": {
+      "sunny": "Солнечно",
+      "clear-night": "Ясно",
+      "cloudy": "Облачно",
+      "partlycloudy": "Переменная облачность",
+      "rainy": "Дождь",
+      "pouring": "Ливень",
+      "snowy": "Снег",
+      "snowy-rainy": "Мокрый снег",
+      "fog": "Туман",
+      "hail": "Град",
+      "lightning": "Молния",
+      "lightning-rainy": "Гроза",
+      "windy": "Ветрено",
+      "windy-variant": "Ветрено",
+      "exceptional": "Исключительно"
+    }
   }
 }

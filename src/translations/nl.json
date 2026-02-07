@@ -122,7 +122,8 @@
     "default_room": "Standaard Kamer",
     "favorites": "Favorieten",
     "scenes": "Scènes",
-    "cameras": "Camera's"
+    "cameras": "Camera's",
+    "weather": "Weer"
   },
   "ui_actions": {
     "done": "Klaar",
@@ -239,10 +240,37 @@
     "search_accessories": "Zoek naar accessoires...",
     "search_switches": "Zoek naar schakelaars...",
     "hide_ha_header": "Home Assistant Header Verbergen",
-    "hide_ha_sidebar": "Home Assistant Zijbalk Verbergen"
+    "hide_ha_sidebar": "Home Assistant Zijbalk Verbergen",
+    "weather_entity": "Weerentiteit",
+    "search_weather_entity": "Zoek naar weerentiteiten...",
+    "weather_entity_description": "Selecteer een weerentiteit om een weersectie op het startscherm te tonen"
   },
   "status_messages": {
     "unavailable": "Niet beschikbaar",
     "loading_automations": "Automatiseringen Laden..."
+  },
+  "weather": {
+    "unavailable": "Weer niet beschikbaar",
+    "humidity": "Luchtvochtigheid",
+    "wind": "Wind",
+    "high": "H",
+    "low": "L",
+    "conditions": {
+      "sunny": "Zonnig",
+      "clear-night": "Helder",
+      "cloudy": "Bewolkt",
+      "partlycloudy": "Gedeeltelijk bewolkt",
+      "rainy": "Regenachtig",
+      "pouring": "Stortbui",
+      "snowy": "Sneeuw",
+      "snowy-rainy": "Natte sneeuw",
+      "fog": "Mist",
+      "hail": "Hagel",
+      "lightning": "Bliksem",
+      "lightning-rainy": "Onweer",
+      "windy": "Winderig",
+      "windy-variant": "Winderig",
+      "exceptional": "Uitzonderlijk"
+    }
   }
 }

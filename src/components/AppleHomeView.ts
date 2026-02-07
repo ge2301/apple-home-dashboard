@@ -2315,6 +2315,14 @@ export class AppleHomeView extends HTMLElement {
         didChange = true;
       }
 
+      // --- Weather entity ---
+      const weatherChanged = oldHome.weather_entity !== newHome.weather_entity;
+      if (weatherChanged) {
+        this._rendered = false;
+        await this.renderPage('refreshCallback');
+        return;
+      }
+
       // --- Switches toggle ---
       const switchesChanged = oldHome.showSwitches !== newHome.showSwitches;
       const includedSwitchesChanged = JSON.stringify(oldHome.includedSwitches || []) !== JSON.stringify(newHome.includedSwitches || []);

@@ -5,6 +5,7 @@ import { ScenesSection } from '../sections/ScenesSection';
 import { CamerasSection } from '../sections/CamerasSection';
 import { AreaSection } from '../sections/AreaSection';
 import { FavoritesSection } from '../sections/FavoritesSection';
+import { WeatherSection } from '../sections/WeatherSection';
 import { Entity, Area } from '../types/types';
 
 export class HomePage {
@@ -13,6 +14,7 @@ export class HomePage {
   private camerasSection?: CamerasSection;
   private areaSection?: AreaSection;
   private favoritesSection?: FavoritesSection;
+  private weatherSection?: WeatherSection;
   private _hass?: any;
   private _title?: string;
   private _config?: any;
@@ -43,6 +45,7 @@ export class HomePage {
       this.camerasSection = new CamerasSection(this.customizationManager);
       this.areaSection = new AreaSection(this.customizationManager);
       this.favoritesSection = new FavoritesSection(this.customizationManager);
+      this.weatherSection = new WeatherSection(this.customizationManager);
     }
   }
 
@@ -183,7 +186,7 @@ export class HomePage {
     hass: any,
     onTallToggle?: (entityId: string, areaId: string) => void | Promise<void | boolean>
   ): Promise<void> {
-    if (!this.customizationManager || !this.scenesSection || !this.camerasSection || !this.areaSection || !this.favoritesSection) {
+    if (!this.customizationManager || !this.scenesSection || !this.camerasSection || !this.areaSection || !this.favoritesSection || !this.weatherSection) {
       throw new Error('Required sections not initialized');
     }
     
@@ -193,7 +196,15 @@ export class HomePage {
     
     // Create a map of all available sections
     const availableSections = new Map<string, () => Promise<void>>();
-    
+
+    // Add weather section if a weather entity is configured and exists
+    const weatherEntity = await this.customizationManager?.getWeatherEntity();
+    if (weatherEntity && hass.states[weatherEntity]) {
+      availableSections.set('weather_section', async () => {
+        await this.weatherSection!.render(container, hass);
+      });
+    }
+
     // Add favorites section if there are favorites defined
     const hasFavorites = await this.customizationManager?.hasFavoriteAccessories();
     if (hasFavorites) {
@@ -235,12 +246,19 @@ export class HomePage {
       // Add any new sections that weren't in the saved order
       for (const sectionId of availableSections.keys()) {
         if (!orderedSectionIds.includes(sectionId)) {
-          orderedSectionIds.push(sectionId);
+          // Weather section defaults to first position when newly added
+          if (sectionId === 'weather_section') {
+            orderedSectionIds.unshift(sectionId);
+          } else {
+            orderedSectionIds.push(sectionId);
+          }
         }
       }
     } else {
-      // Default order: cameras, scenes, favorites, then areas alphabetically
+      // Default order: weather, cameras, scenes, favorites, then areas alphabetically
       orderedSectionIds = Array.from(availableSections.keys()).sort((a, b) => {
+        if (a === 'weather_section') return -1;
+        if (b === 'weather_section') return 1;
         if (a === 'cameras_section') return -1;
         if (b === 'cameras_section') return 1;
         if (a === 'scenes_section') return -1;

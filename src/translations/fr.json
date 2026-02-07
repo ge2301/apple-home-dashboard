@@ -122,7 +122,8 @@
     "default_room": "Pièce par Défaut",
     "favorites": "Favoris",
     "scenes": "Scènes",
-    "cameras": "Caméras"
+    "cameras": "Caméras",
+    "weather": "Météo"
   },
   "ui_actions": {
     "done": "Terminé",
@@ -239,10 +240,37 @@
     "search_accessories": "Rechercher des accessoires...",
     "search_switches": "Rechercher des commutateurs...",
     "hide_ha_header": "Masquer l'En-tête Home Assistant",
-    "hide_ha_sidebar": "Masquer la Barre Latérale Home Assistant"
+    "hide_ha_sidebar": "Masquer la Barre Latérale Home Assistant",
+    "weather_entity": "Entité météo",
+    "search_weather_entity": "Rechercher des entités météo...",
+    "weather_entity_description": "Sélectionnez une entité météo pour afficher une section météo sur l'écran d'accueil"
   },
   "status_messages": {
     "unavailable": "Indisponible",
     "loading_automations": "Chargement des Automatisations..."
+  },
+  "weather": {
+    "unavailable": "Météo indisponible",
+    "humidity": "Humidité",
+    "wind": "Vent",
+    "high": "H",
+    "low": "L",
+    "conditions": {
+      "sunny": "Ensoleillé",
+      "clear-night": "Dégagé",
+      "cloudy": "Nuageux",
+      "partlycloudy": "Partiellement nuageux",
+      "rainy": "Pluvieux",
+      "pouring": "Averse",
+      "snowy": "Neigeux",
+      "snowy-rainy": "Pluie verglaçante",
+      "fog": "Brouillard",
+      "hail": "Grêle",
+      "lightning": "Éclair",
+      "lightning-rainy": "Orage",
+      "windy": "Venteux",
+      "windy-variant": "Venteux",
+      "exceptional": "Exceptionnel"
+    }
   }
 }

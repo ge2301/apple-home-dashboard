@@ -124,7 +124,8 @@
     "default_room": "Stanza Predefinita",
     "favorites": "Preferiti",
     "scenes": "Scene",
-    "cameras": "Telecamere"
+    "cameras": "Telecamere",
+    "weather": "Meteo"
   },
   "ui_actions": {
     "done": "Fatto",
@@ -241,10 +242,37 @@
     "search_accessories": "Cerca accessori...",
     "search_switches": "Cerca interruttori...",
     "hide_ha_header": "Nascondi Intestazione Home Assistant",
-    "hide_ha_sidebar": "Nascondi Barra Laterale Home Assistant"
+    "hide_ha_sidebar": "Nascondi Barra Laterale Home Assistant",
+    "weather_entity": "Entità meteo",
+    "search_weather_entity": "Cerca entità meteo...",
+    "weather_entity_description": "Seleziona un'entità meteo per mostrare una sezione meteo nella schermata principale"
   },
   "status_messages": {
     "unavailable": "Non disponibile",
     "loading_automations": "Caricamento Automazioni..."
+  },
+  "weather": {
+    "unavailable": "Meteo non disponibile",
+    "humidity": "Umidità",
+    "wind": "Vento",
+    "high": "H",
+    "low": "L",
+    "conditions": {
+      "sunny": "Soleggiato",
+      "clear-night": "Sereno",
+      "cloudy": "Nuvoloso",
+      "partlycloudy": "Parzialmente nuvoloso",
+      "rainy": "Piovoso",
+      "pouring": "Acquazzone",
+      "snowy": "Nevoso",
+      "snowy-rainy": "Nevischio",
+      "fog": "Nebbia",
+      "hail": "Grandine",
+      "lightning": "Fulmine",
+      "lightning-rainy": "Temporale",
+      "windy": "Ventoso",
+      "windy-variant": "Ventoso",
+      "exceptional": "Eccezionale"
+    }
   }
 }

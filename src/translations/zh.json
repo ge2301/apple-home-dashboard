@@ -122,7 +122,8 @@
     "default_room": "默认房间",
     "favorites": "收藏夹",
     "scenes": "场景",
-    "cameras": "摄像头"
+    "cameras": "摄像头",
+    "weather": "天气"
   },
   "ui_actions": {
     "done": "完成",
@@ -239,10 +240,37 @@
     "search_accessories": "搜索配件...",
     "search_switches": "搜索开关...",
     "hide_ha_header": "隐藏 Home Assistant 标题栏",
-    "hide_ha_sidebar": "隐藏 Home Assistant 侧边栏"
+    "hide_ha_sidebar": "隐藏 Home Assistant 侧边栏",
+    "weather_entity": "天气实体",
+    "search_weather_entity": "搜索天气实体...",
+    "weather_entity_description": "选择一个天气实体以在主屏幕上显示天气部分"
   },
   "status_messages": {
     "unavailable": "不可用",
     "loading_automations": "正在加载自动化..."
+  },
+  "weather": {
+    "unavailable": "天气不可用",
+    "humidity": "湿度",
+    "wind": "风速",
+    "high": "高",
+    "low": "低",
+    "conditions": {
+      "sunny": "晴天",
+      "clear-night": "晴朗",
+      "cloudy": "多云",
+      "partlycloudy": "局部多云",
+      "rainy": "雨天",
+      "pouring": "大雨",
+      "snowy": "雪天",
+      "snowy-rainy": "雨夹雪",
+      "fog": "雾",
+      "hail": "冰雹",
+      "lightning": "闪电",
+      "lightning-rainy": "雷暴",
+      "windy": "大风",
+      "windy-variant": "大风",
+      "exceptional": "异常"
+    }
   }
 }

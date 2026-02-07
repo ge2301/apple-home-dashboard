@@ -124,7 +124,8 @@
     "default_room": "Quarto Padrão",
     "favorites": "Favoritos",
     "scenes": "Cenas",
-    "cameras": "Câmeras"
+    "cameras": "Câmeras",
+    "weather": "Clima"
   },
   "ui_actions": {
     "done": "Concluído",
@@ -241,10 +242,37 @@
     "search_accessories": "Procurar acessórios...",
     "search_switches": "Procurar interruptores...",
     "hide_ha_header": "Ocultar Cabeçalho Home Assistant",
-    "hide_ha_sidebar": "Ocultar Barra Lateral Home Assistant"
+    "hide_ha_sidebar": "Ocultar Barra Lateral Home Assistant",
+    "weather_entity": "Entidade do clima",
+    "search_weather_entity": "Pesquisar entidades do clima...",
+    "weather_entity_description": "Selecione uma entidade do clima para exibir uma seção de clima na tela inicial"
   },
   "status_messages": {
     "unavailable": "Indisponível",
     "loading_automations": "Carregando Automações..."
+  },
+  "weather": {
+    "unavailable": "Clima indisponível",
+    "humidity": "Umidade",
+    "wind": "Vento",
+    "high": "H",
+    "low": "L",
+    "conditions": {
+      "sunny": "Ensolarado",
+      "clear-night": "Limpo",
+      "cloudy": "Nublado",
+      "partlycloudy": "Parcialmente nublado",
+      "rainy": "Chuvoso",
+      "pouring": "Chuva forte",
+      "snowy": "Nevando",
+      "snowy-rainy": "Chuva com neve",
+      "fog": "Nevoeiro",
+      "hail": "Granizo",
+      "lightning": "Relâmpago",
+      "lightning-rainy": "Tempestade",
+      "windy": "Ventoso",
+      "windy-variant": "Ventoso",
+      "exceptional": "Excepcional"
+    }
   }
 }
