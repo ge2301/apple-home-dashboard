@@ -2,7 +2,7 @@
  * Apple Home Dashboard Strategy - Stateless Implementation
  * Apple Home-like automatic dashboard for Home Assistant
  * 
- * Version: 2.1.0 - Stateless Architecture
+ * Version: 2.2.0 - Energy Dashboard
  * Author: Apple Home Dashboard Team
  * 
  * This follows the proven mushroom-strategy pattern of stateless configuration generation.

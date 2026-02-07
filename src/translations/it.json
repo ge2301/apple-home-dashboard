@@ -72,6 +72,7 @@
     "water": "Acqua",
     "media": "Altoparlanti e TV",
     "vacuum": "Aspirapolvere",
+    "energy": "Energia",
     "other": "Altri"
   },
   "chip_status": {
@@ -125,7 +126,8 @@
     "favorites": "Preferiti",
     "scenes": "Scene",
     "cameras": "Telecamere",
-    "weather": "Meteo"
+    "weather": "Meteo",
+    "energy": "Energia"
   },
   "ui_actions": {
     "done": "Fatto",
@@ -213,6 +215,30 @@
   "camera": {
     "no_snapshot_available": "Nessuna istantanea disponibile"
   },
+  "energy": {
+    "current_usage": "Consumo Attuale",
+    "today": "Oggi",
+    "solar": "Solare",
+    "battery": "Batteria",
+    "grid_return": "Ritorno in Rete",
+    "now": "ORA",
+    "active": "Attivo",
+    "no_data": "Nessun dato energetico",
+    "day": "Giorno",
+    "week": "Settimana",
+    "month": "Mese",
+    "total_consumption": "Totale",
+    "cost": "Costo",
+    "vs_previous": "vs Precedente",
+    "devices": "Dispositivi",
+    "no_devices": "Nessun dispositivo",
+    "solar_production": "Produzione Solare",
+    "battery_status": "Batteria",
+    "charged": "Caricata",
+    "discharged": "Scaricata",
+    "returned_to_grid": "Ritorno in Rete",
+    "self_sufficiency": "Autosufficienza"
+  },
   "errors": {
     "entity_not_found": "Entità non trovata",
     "error_saving_layout": "Errore salvataggio layout",
@@ -245,7 +271,9 @@
     "hide_ha_sidebar": "Nascondi Barra Laterale Home Assistant",
     "weather_entity": "Entità meteo",
     "search_weather_entity": "Cerca entità meteo...",
-    "weather_entity_description": "Seleziona un'entità meteo per mostrare una sezione meteo nella schermata principale"
+    "weather_entity_description": "Seleziona un'entità meteo per mostrare una sezione meteo nella schermata principale",
+    "show_energy": "Mostra Sezione Energia",
+    "show_energy_description": "Mostra una scheda riepilogativa dell'energia nella schermata principale con consumo attuale e grafico dei consumi giornalieri"
   },
   "status_messages": {
     "unavailable": "Non disponibile",

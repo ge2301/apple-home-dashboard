@@ -1035,6 +1035,74 @@ export class AppleHomeView extends HTMLElement {
             touch-action: none;
           }
 
+          /* Weather + Energy side-by-side row */
+          .weather-energy-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            align-items: stretch;
+          }
+          .weather-energy-row .apple-weather-card,
+          .weather-energy-row .apple-energy-card {
+            flex: 1;
+            margin-top: 0;
+            width: auto;
+            min-width: 0;
+            overflow: hidden;
+          }
+          .weather-energy-row .apple-weather-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+          /* Force weather card to stack its inner layout when in the row at medium widths */
+          @container apple-home-view (max-width: 1100px) {
+            .weather-energy-row .weather-card-inner {
+              flex-direction: column;
+              gap: 10px;
+            }
+            .weather-energy-row .weather-clock-side {
+              padding-right: 0;
+              border-right: none;
+              padding-bottom: 10px;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+          }
+          @container apple-home-view (max-width: 755px) {
+            .weather-energy-row {
+              flex-direction: column;
+            }
+            .weather-energy-row .apple-weather-card,
+            .weather-energy-row .apple-energy-card {
+              width: 100%;
+            }
+            /* Restore weather card's row layout when stacked vertically (has full width) */
+            .weather-energy-row .weather-card-inner {
+              flex-direction: row;
+              gap: 24px;
+            }
+            .weather-energy-row .weather-clock-side {
+              padding-right: 24px;
+              border-right: 1px solid rgba(255, 255, 255, 0.1);
+              padding-bottom: 0;
+              border-bottom: none;
+            }
+          }
+          @container apple-home-view (max-width: 555px) {
+            .weather-energy-row .weather-card-inner {
+              flex-direction: column;
+              gap: 10px;
+              text-align: center;
+            }
+            .weather-energy-row .weather-clock-side {
+              padding-right: 0;
+              border-right: none;
+              padding-bottom: 10px;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+              align-items: center;
+            }
+          }
+
           /* Grid layouts for special pages (non-carousel) */
           .room-group-grid, .scenes-grid, .cameras-grid {
             display: grid;
@@ -2318,6 +2386,14 @@ export class AppleHomeView extends HTMLElement {
       // --- Weather entity ---
       const weatherChanged = oldHome.weather_entity !== newHome.weather_entity;
       if (weatherChanged) {
+        this._rendered = false;
+        await this.renderPage('refreshCallback');
+        return;
+      }
+
+      // --- Energy toggle ---
+      const energyChanged = oldHome.show_energy !== newHome.show_energy;
+      if (energyChanged) {
         this._rendered = false;
         await this.renderPage('refreshCallback');
         return;

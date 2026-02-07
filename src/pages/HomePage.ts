@@ -6,6 +6,7 @@ import { CamerasSection } from '../sections/CamerasSection';
 import { AreaSection } from '../sections/AreaSection';
 import { FavoritesSection } from '../sections/FavoritesSection';
 import { WeatherSection } from '../sections/WeatherSection';
+import { EnergySection } from '../sections/EnergySection';
 import { Entity, Area } from '../types/types';
 
 export class HomePage {
@@ -15,6 +16,7 @@ export class HomePage {
   private areaSection?: AreaSection;
   private favoritesSection?: FavoritesSection;
   private weatherSection?: WeatherSection;
+  private energySection?: EnergySection;
   private _hass?: any;
   private _title?: string;
   private _config?: any;
@@ -46,6 +48,7 @@ export class HomePage {
       this.areaSection = new AreaSection(this.customizationManager);
       this.favoritesSection = new FavoritesSection(this.customizationManager);
       this.weatherSection = new WeatherSection(this.customizationManager);
+      this.energySection = new EnergySection(this.customizationManager);
     }
   }
 
@@ -186,7 +189,7 @@ export class HomePage {
     hass: any,
     onTallToggle?: (entityId: string, areaId: string) => void | Promise<void | boolean>
   ): Promise<void> {
-    if (!this.customizationManager || !this.scenesSection || !this.camerasSection || !this.areaSection || !this.favoritesSection || !this.weatherSection) {
+    if (!this.customizationManager || !this.scenesSection || !this.camerasSection || !this.areaSection || !this.favoritesSection || !this.weatherSection || !this.energySection) {
       throw new Error('Required sections not initialized');
     }
     
@@ -194,60 +197,70 @@ export class HomePage {
     const sectionOrder = this.customizationManager.getSavedSectionOrder();
     const hiddenSections = this.customizationManager.getHiddenSections();
     
-    // Create a map of all available sections
-    const availableSections = new Map<string, () => Promise<void>>();
+    // Create a map of all available sections (closures accept optional target container)
+    const availableSections = new Map<string, (target?: HTMLElement) => Promise<void>>();
 
     // Add weather section if a weather entity is configured and exists
     const weatherEntity = await this.customizationManager?.getWeatherEntity();
-    if (weatherEntity && hass.states[weatherEntity]) {
-      availableSections.set('weather_section', async () => {
-        await this.weatherSection!.render(container, hass);
+    const hasWeather = !!(weatherEntity && hass.states[weatherEntity]);
+    if (hasWeather) {
+      availableSections.set('weather_section', async (target?: HTMLElement) => {
+        await this.weatherSection!.render(target || container, hass);
+      });
+    }
+
+    // Add energy section if enabled in settings and energy sensors exist
+    const showEnergy = await this.customizationManager?.getShowEnergy();
+    const hasEnergy = !!(showEnergy && EnergySection.hasEnergySensors(hass));
+    if (hasEnergy) {
+      availableSections.set('energy_section', async (target?: HTMLElement) => {
+        await this.energySection!.render(target || container, hass);
       });
     }
 
     // Add favorites section if there are favorites defined
     const hasFavorites = await this.customizationManager?.hasFavoriteAccessories();
     if (hasFavorites) {
-      availableSections.set('favorites_section', async () => {
-        await this.favoritesSection!.render(container, allEntities, hass, onTallToggle);
+      availableSections.set('favorites_section', async (target?: HTMLElement) => {
+        await this.favoritesSection!.render(target || container, allEntities, hass, onTallToggle);
       });
     }
-    
+
     // Add scenes section if there are any scenes or scripts
     if (scenesEntities.length > 0) {
-      availableSections.set('scenes_section', async () => {
-        await this.scenesSection!.render(container, scenesEntities, hass, onTallToggle);
+      availableSections.set('scenes_section', async (target?: HTMLElement) => {
+        await this.scenesSection!.render(target || container, scenesEntities, hass, onTallToggle);
       });
     }
-    
+
     // Add cameras section if there are any cameras
     if (camerasEntities.length > 0) {
-      availableSections.set('cameras_section', async () => {
-        await this.camerasSection!.render(container, camerasEntities, hass, onTallToggle);
+      availableSections.set('cameras_section', async (target?: HTMLElement) => {
+        await this.camerasSection!.render(target || container, camerasEntities, hass, onTallToggle);
       });
     }
-    
+
     // Add area sections
     for (const areaId of Object.keys(entitiesByArea)) {
       if (entitiesByArea[areaId].length > 0) {
-        availableSections.set(areaId, async () => {
-          await this.areaSection!.renderSingleArea(container, areaId, entitiesByArea[areaId], hass, onTallToggle, 'home');
+        availableSections.set(areaId, async (target?: HTMLElement) => {
+          await this.areaSection!.renderSingleArea(target || container, areaId, entitiesByArea[areaId], hass, onTallToggle, 'home');
         });
       }
     }
-    
+
     // Apply section ordering
     let orderedSectionIds: string[] = [];
-    
+
     if (sectionOrder.length > 0) {
       // Use saved order
       orderedSectionIds = sectionOrder.filter(id => availableSections.has(id));
-      
+
       // Add any new sections that weren't in the saved order
       for (const sectionId of availableSections.keys()) {
         if (!orderedSectionIds.includes(sectionId)) {
-          // Weather section defaults to first position when newly added
-          if (sectionId === 'weather_section') {
+          // Weather/energy sections default to first position when newly added
+          if (sectionId === 'weather_section' || sectionId === 'energy_section') {
             orderedSectionIds.unshift(sectionId);
           } else {
             orderedSectionIds.push(sectionId);
@@ -255,10 +268,12 @@ export class HomePage {
         }
       }
     } else {
-      // Default order: weather, cameras, scenes, favorites, then areas alphabetically
+      // Default order: weather, energy, cameras, scenes, favorites, then areas alphabetically
       orderedSectionIds = Array.from(availableSections.keys()).sort((a, b) => {
         if (a === 'weather_section') return -1;
         if (b === 'weather_section') return 1;
+        if (a === 'energy_section') return -1;
+        if (b === 'energy_section') return 1;
         if (a === 'cameras_section') return -1;
         if (b === 'cameras_section') return 1;
         if (a === 'scenes_section') return -1;
@@ -268,12 +283,43 @@ export class HomePage {
         return a.localeCompare(b);
       });
     }
-    
-    // Render sections in order, respecting visibility settings
-    for (const sectionId of orderedSectionIds) {
-      if (!hiddenSections.includes(sectionId) && availableSections.has(sectionId)) {
-        await availableSections.get(sectionId)!();
+
+    // Render sections in order, pairing adjacent weather+energy in a side-by-side row
+    const rendered = new Set<string>();
+    for (let i = 0; i < orderedSectionIds.length; i++) {
+      const sectionId = orderedSectionIds[i];
+      if (rendered.has(sectionId) || hiddenSections.includes(sectionId) || !availableSections.has(sectionId)) continue;
+
+      // Check if weather and energy are adjacent — pair them side-by-side
+      if ((sectionId === 'weather_section' || sectionId === 'energy_section') && hasWeather && hasEnergy) {
+        const otherSection = sectionId === 'weather_section' ? 'energy_section' : 'weather_section';
+        if (!rendered.has(otherSection) && !hiddenSections.includes(otherSection) && availableSections.has(otherSection)) {
+          // Find the next visible section after current
+          let nextVisible: string | null = null;
+          for (let j = i + 1; j < orderedSectionIds.length; j++) {
+            const nextId = orderedSectionIds[j];
+            if (!rendered.has(nextId) && !hiddenSections.includes(nextId) && availableSections.has(nextId)) {
+              nextVisible = nextId;
+              break;
+            }
+          }
+
+          if (nextVisible === otherSection) {
+            // Adjacent! Wrap in a side-by-side row
+            const wrapper = document.createElement('div');
+            wrapper.className = 'weather-energy-row';
+            container.appendChild(wrapper);
+            await availableSections.get(sectionId)!(wrapper);
+            await availableSections.get(otherSection)!(wrapper);
+            rendered.add(sectionId);
+            rendered.add(otherSection);
+            continue;
+          }
+        }
       }
+
+      await availableSections.get(sectionId)!();
+      rendered.add(sectionId);
     }
   }
 

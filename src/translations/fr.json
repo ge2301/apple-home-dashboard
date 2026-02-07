@@ -72,6 +72,7 @@
     "water": "Eau",
     "media": "Haut-parleurs et TVs",
     "vacuum": "Aspirateurs",
+    "energy": "Énergie",
     "other": "Autres"
   },
   "chip_status": {
@@ -123,7 +124,8 @@
     "favorites": "Favoris",
     "scenes": "Scènes",
     "cameras": "Caméras",
-    "weather": "Météo"
+    "weather": "Météo",
+    "energy": "Énergie"
   },
   "ui_actions": {
     "done": "Terminé",
@@ -211,6 +213,30 @@
   "camera": {
     "no_snapshot_available": "Aucun instantané disponible"
   },
+  "energy": {
+    "current_usage": "Consommation Actuelle",
+    "today": "Aujourd'hui",
+    "solar": "Solaire",
+    "battery": "Batterie",
+    "grid_return": "Retour Réseau",
+    "now": "MAINT.",
+    "active": "Actif",
+    "no_data": "Aucune donnée énergétique",
+    "day": "Jour",
+    "week": "Semaine",
+    "month": "Mois",
+    "total_consumption": "Total",
+    "cost": "Coût",
+    "vs_previous": "vs Précédent",
+    "devices": "Appareils",
+    "no_devices": "Aucun appareil",
+    "solar_production": "Production Solaire",
+    "battery_status": "Batterie",
+    "charged": "Chargée",
+    "discharged": "Déchargée",
+    "returned_to_grid": "Retour Réseau",
+    "self_sufficiency": "Autosuffisance"
+  },
   "errors": {
     "entity_not_found": "Entité non trouvée",
     "error_saving_layout": "Erreur sauvegarde mise en page",
@@ -243,7 +269,9 @@
     "hide_ha_sidebar": "Masquer la Barre Latérale Home Assistant",
     "weather_entity": "Entité météo",
     "search_weather_entity": "Rechercher des entités météo...",
-    "weather_entity_description": "Sélectionnez une entité météo pour afficher une section météo sur l'écran d'accueil"
+    "weather_entity_description": "Sélectionnez une entité météo pour afficher une section météo sur l'écran d'accueil",
+    "show_energy": "Afficher la Section Énergie",
+    "show_energy_description": "Affiche une carte récapitulative d'énergie sur l'écran d'accueil avec la consommation actuelle et le graphique de consommation quotidien"
   },
   "status_messages": {
     "unavailable": "Indisponible",

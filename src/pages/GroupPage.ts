@@ -6,6 +6,7 @@ import { CamerasSection } from '../sections/CamerasSection';
 import { AreaSection } from '../sections/AreaSection';
 import { StatusSection } from '../sections/StatusSection';
 import { WeatherSection } from '../sections/WeatherSection';
+import { EnergySection } from '../sections/EnergySection';
 import { Entity } from '../types/types';
 
 export class GroupPage {
@@ -15,6 +16,7 @@ export class GroupPage {
   private areaSection?: AreaSection;
   private statusSection?: StatusSection;
   private weatherSection?: WeatherSection;
+  private energySection?: EnergySection;
   private _hass?: any;
   private _group?: DeviceGroup;
   private _config?: any;
@@ -55,6 +57,7 @@ export class GroupPage {
       this.areaSection = new AreaSection(this.customizationManager);
       this.statusSection = new StatusSection(this.customizationManager);
       this.weatherSection = new WeatherSection(this.customizationManager);
+      this.energySection = new EnergySection(this.customizationManager);
     }
   }
 
@@ -217,6 +220,33 @@ export class GroupPage {
         }
       }
 
+      // For ENERGY group, also include energy/power sensor entities (sensor domain isn't in SUPPORTED_DOMAINS)
+      if (group === DeviceGroup.ENERGY) {
+        const energySensors = entities.filter(entity => {
+          if (entity.entity_category === 'config' || entity.entity_category === 'diagnostic') return false;
+          if (excludedFromDashboard.has(entity.entity_id)) return false;
+          if (this.isEntityInHiddenArea(entity, devices, hiddenSections)) return false;
+          const domain = entity.entity_id.split('.')[0];
+          if (domain !== 'sensor') return false;
+          const state = hass.states[entity.entity_id];
+          if (!state) return false;
+          const dc = state.attributes?.device_class;
+          const reg = (hass.entities as any)?.[entity.entity_id];
+          if (reg?.hidden_by || reg?.disabled_by) return false;
+          return (dc === 'energy' || dc === 'power') && !!state.attributes?.state_class;
+        });
+
+        for (const entity of energySensors) {
+          const areaId = this.getEntityAreaId(entity, devices);
+          if (!groupEntitiesByArea[areaId]) {
+            groupEntitiesByArea[areaId] = [];
+          }
+          if (!groupEntitiesByArea[areaId].some(e => e.entity_id === entity.entity_id)) {
+            groupEntitiesByArea[areaId].push(entity);
+          }
+        }
+      }
+
       // Collect all entity IDs that belong to this group (for battery device matching)
       const groupEntityIds = new Set<string>();
       Object.values(groupEntitiesByArea).forEach(entities => {
@@ -341,6 +371,13 @@ export class GroupPage {
       }
     }
 
+    // Add energy section for energy group
+    if (this._group === DeviceGroup.ENERGY && this.energySection) {
+      availableSections.set('energy_section', async () => {
+        await this.energySection!.render(container, hass, 'group');
+      });
+    }
+
     // Add scenes section if there are any scenes or scripts
     if (scenesEntities.length > 0) {
       availableSections.set('scenes_section', async () => {
@@ -374,7 +411,7 @@ export class GroupPage {
       // Add any new sections that weren't in the saved order
       for (const sectionId of availableSections.keys()) {
         if (!orderedSectionIds.includes(sectionId)) {
-          if (sectionId === 'weather_section') {
+          if (sectionId === 'weather_section' || sectionId === 'energy_section') {
             orderedSectionIds.unshift(sectionId);
           } else {
             orderedSectionIds.push(sectionId);
@@ -382,10 +419,12 @@ export class GroupPage {
         }
       }
     } else {
-      // Default order: weather, cameras, scenes, then areas alphabetically
+      // Default order: weather, energy, cameras, scenes, then areas alphabetically
       orderedSectionIds = Array.from(availableSections.keys()).sort((a, b) => {
         if (a === 'weather_section') return -1;
         if (b === 'weather_section') return 1;
+        if (a === 'energy_section') return -1;
+        if (b === 'energy_section') return 1;
         if (a === 'cameras_section') return -1;
         if (b === 'cameras_section') return 1;
         if (a === 'scenes_section') return -1;

@@ -2,6 +2,7 @@ import { DashboardConfig, DeviceGroup } from '../config/DashboardConfig';
 import { EntityState } from '../types/types';
 import { localize } from '../utils/LocalizationService';
 import { RTLHelper } from '../utils/RTLHelper';
+import { EnergySection } from './EnergySection';
 
 export interface ChipConfig {
   group: DeviceGroup;
@@ -16,6 +17,7 @@ export interface ChipsConfig {
   security?: ChipConfig;
   media?: ChipConfig;
   water?: ChipConfig;
+  energy?: ChipConfig;
 }
 
 export interface ChipData {
@@ -131,6 +133,11 @@ export class AppleChips {
         group: DeviceGroup.WATER,
         enabled: false,
         show_when_zero: false
+      },
+      energy: {
+        group: DeviceGroup.ENERGY,
+        enabled: true,
+        show_when_zero: false
       }
     };
   }
@@ -189,7 +196,8 @@ export class AppleChips {
         if (domain !== 'binary_sensor' && domain !== 'sensor') continue;
         const isWaterEntity = AppleChips.WATER_KEYWORDS.some(kw => entityId.includes(kw)) ||
                              newHass.states[entityId]?.attributes?.device_class === 'moisture';
-        if (!isWaterEntity) continue;
+        const isPowerEntity = domain === 'sensor' && newHass.states[entityId]?.attributes?.device_class === 'power';
+        if (!isWaterEntity && !isPowerEntity) continue;
       }
 
       const oldEntity = this._hass.states[entityId];
@@ -341,7 +349,8 @@ export class AppleChips {
       { group: DeviceGroup.LIGHTING, config: this.config.lights },
       { group: DeviceGroup.SECURITY, config: this.config.security },
       { group: DeviceGroup.MEDIA, config: this.config.media },
-      { group: DeviceGroup.WATER, config: this.config.water }
+      { group: DeviceGroup.WATER, config: this.config.water },
+      { group: DeviceGroup.ENERGY, config: this.config.energy }
     ];
 
     for (const { group, config } of deviceGroups) {
@@ -375,8 +384,8 @@ export class AppleChips {
 
       // Special handling for water group since it's not in the domain mapping
       if (group === DeviceGroup.WATER) {
-        const waterEntities = allEntities.filter(entity => 
-          entity.entity_id.includes('water') || 
+        const waterEntities = allEntities.filter(entity =>
+          entity.entity_id.includes('water') ||
           entity.entity_id.includes('leak') ||
           entity.entity_id.includes('flood') ||
           entity.attributes.device_class === 'moisture'
@@ -384,9 +393,11 @@ export class AppleChips {
         groupEntities.push(...waterEntities);
       }
 
-      // Only show chip if there are actual entities for this group
-      // Don't show empty chips even if show_when_zero is true (that setting is for showing "0 on" status, not for empty groups)
-      const shouldShow = groupEntities.length > 0;
+      // Special handling for energy group - detect energy/power sensors
+      let shouldShow = groupEntities.length > 0;
+      if (group === DeviceGroup.ENERGY) {
+        shouldShow = EnergySection.hasEnergySensors(this._hass);
+      }
       
       if (shouldShow) {
         const groupStyle = DashboardConfig.getGroupStyle(group);
@@ -898,7 +909,16 @@ export class AppleChips {
         const activeWater = entities.filter(entity => entity.state === 'on' || entity.state === 'detected');
         statusText = activeWater.length > 0 ? `${activeWater.length} ${localize('chip_status.active')}` : localize('status.off');
         break;
-        
+
+      case DeviceGroup.ENERGY:
+        const totalPower = EnergySection.getTotalPower(this._hass);
+        if (totalPower !== null) {
+          statusText = totalPower >= 1000 ? `${(totalPower / 1000).toFixed(1)} kW` : `${Math.round(totalPower)} W`;
+        } else {
+          statusText = localize('energy.active');
+        }
+        break;
+
       default:
         statusText = localize('status.off');
         break;

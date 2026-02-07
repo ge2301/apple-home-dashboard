@@ -417,7 +417,7 @@ export class WeatherSection {
 
       .weather-clock-time {
         font-size: 48px;
-        font-weight: 300;
+        font-weight: 600;
         color: white;
         line-height: 1.1;
         letter-spacing: -1px;

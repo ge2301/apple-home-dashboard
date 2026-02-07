@@ -29,6 +29,7 @@ export enum DeviceGroup {
   WATER = 'water',
   MEDIA = 'media',
   VACUUM = 'vacuum',
+  ENERGY = 'energy',
   OTHER = 'other'
 }
 
@@ -103,6 +104,11 @@ export class DashboardConfig {
       iconColor: '#ff9500', // Soft orange for vacuums (Apple Home style)
       icon: 'mdi:robot-vacuum',
       name: () => localize('groups.vacuum')
+    },
+    [DeviceGroup.ENERGY]: {
+      iconColor: '#34C759', // Green for energy (Apple's energy color)
+      icon: 'mdi:flash',
+      name: () => localize('groups.energy')
     },
     [DeviceGroup.OTHER]: {
       iconColor: '#ffcc0f', // Yellow for switches/outlets (same as lights)
@@ -256,6 +262,10 @@ export class DashboardConfig {
       // Illuminance/light sensors go to Lighting
       if (deviceClass === 'illuminance' || unitOfMeasurement === 'lx') {
         return DeviceGroup.LIGHTING;
+      }
+      // Energy and power sensors go to Energy
+      if (deviceClass === 'energy' || deviceClass === 'power') {
+        return DeviceGroup.ENERGY;
       }
       // Battery sensors go to Other (or could be shown anywhere)
       if (deviceClass === 'battery') {
@@ -453,6 +463,28 @@ export class DashboardConfig {
         return 'mdi:gesture-tap-button';
       case 'vacuum':
         return entityState === 'cleaning' ? 'mdi:robot-vacuum' : 'mdi:robot-vacuum';
+      case 'sensor': {
+        const dc = attributes?.device_class;
+        if (dc === 'energy') return 'mdi:flash';
+        if (dc === 'power') return 'mdi:flash';
+        if (dc === 'temperature') return 'mdi:thermometer';
+        if (dc === 'humidity') return 'mdi:water-percent';
+        if (dc === 'battery') return 'mdi:battery';
+        if (dc === 'illuminance') return 'mdi:brightness-5';
+        return 'mdi:eye';
+      }
+      case 'binary_sensor': {
+        const bdc = attributes?.device_class;
+        if (bdc === 'motion') return entityState === 'on' ? 'mdi:motion-sensor' : 'mdi:motion-sensor-off';
+        if (bdc === 'door') return entityState === 'on' ? 'mdi:door-open' : 'mdi:door-closed';
+        if (bdc === 'window') return entityState === 'on' ? 'mdi:window-open' : 'mdi:window-closed';
+        if (bdc === 'smoke') return 'mdi:smoke-detector';
+        if (bdc === 'gas') return 'mdi:gas-cylinder';
+        if (bdc === 'moisture') return 'mdi:water-alert';
+        if (bdc === 'occupancy') return 'mdi:home-account';
+        if (bdc === 'light') return 'mdi:brightness-5';
+        return entityState === 'on' ? 'mdi:checkbox-marked-circle' : 'mdi:checkbox-blank-circle-outline';
+      }
       default:
         return 'mdi:help-circle';
     }

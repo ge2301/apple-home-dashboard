@@ -72,6 +72,7 @@
     "water": "מים",
     "media": "רמקולים וטלוויזיות",
     "vacuum": "שואבי אבק",
+    "energy": "אנרגיה",
     "other": "אחר"
   },
   "chip_status": {
@@ -123,7 +124,8 @@
     "favorites": "מועדפים",
     "scenes": "תרחישים",
     "cameras": "מצלמות",
-    "weather": "מזג אוויר"
+    "weather": "מזג אוויר",
+    "energy": "אנרגיה"
   },
   "ui_actions": {
     "done": "סיום",
@@ -211,6 +213,30 @@
   "camera": {
     "no_snapshot_available": "תמונה לא זמינה"
   },
+  "energy": {
+    "current_usage": "צריכה נוכחית",
+    "today": "היום",
+    "solar": "סולארי",
+    "battery": "סוללה",
+    "grid_return": "החזרה לרשת",
+    "now": "עכשיו",
+    "active": "פעיל",
+    "no_data": "אין נתוני אנרגיה",
+    "day": "יום",
+    "week": "שבוע",
+    "month": "חודש",
+    "total_consumption": "סה״כ",
+    "cost": "עלות",
+    "vs_previous": "לעומת קודם",
+    "devices": "מכשירים",
+    "no_devices": "אין מכשירים",
+    "solar_production": "ייצור סולארי",
+    "battery_status": "סוללה",
+    "charged": "נטען",
+    "discharged": "פורק",
+    "returned_to_grid": "החזרה לרשת",
+    "self_sufficiency": "עצמאות אנרגטית"
+  },
   "errors": {
     "entity_not_found": "ישות לא נמצאה",
     "error_saving_layout": "שגיאה בשמירת פריסה",
@@ -243,7 +269,9 @@
     "hide_ha_sidebar": "הסתר את תפריט הצד של Home Assistant",
     "weather_entity": "ישות מזג אוויר",
     "search_weather_entity": "חיפוש ישויות מזג אוויר...",
-    "weather_entity_description": "בחר ישות מזג אוויר כדי להציג מדור מזג אוויר במסך הבית"
+    "weather_entity_description": "בחר ישות מזג אוויר כדי להציג מדור מזג אוויר במסך הבית",
+    "show_energy": "הצג אנרגיה",
+    "show_energy_description": "הצג כרטיס סיכום אנרגיה במסך הבית עם צריכה נוכחית ותרשים צריכה יומי"
   },
   "status_messages": {
     "unavailable": "לא זמין",

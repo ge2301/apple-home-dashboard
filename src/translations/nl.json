@@ -72,6 +72,7 @@
     "water": "Water",
     "media": "Speakers & TV's",
     "vacuum": "Stofzuigers",
+    "energy": "Energie",
     "other": "Overige"
   },
   "chip_status": {
@@ -123,7 +124,8 @@
     "favorites": "Favorieten",
     "scenes": "Scènes",
     "cameras": "Camera's",
-    "weather": "Weer"
+    "weather": "Weer",
+    "energy": "Energie"
   },
   "ui_actions": {
     "done": "Klaar",
@@ -211,6 +213,30 @@
   "camera": {
     "no_snapshot_available": "Geen momentopname beschikbaar"
   },
+  "energy": {
+    "current_usage": "Huidig Verbruik",
+    "today": "Vandaag",
+    "solar": "Zonne-energie",
+    "battery": "Batterij",
+    "grid_return": "Teruglevering",
+    "now": "NU",
+    "active": "Actief",
+    "no_data": "Geen energiegegevens",
+    "day": "Dag",
+    "week": "Week",
+    "month": "Maand",
+    "total_consumption": "Totaal",
+    "cost": "Kosten",
+    "vs_previous": "vs Vorige",
+    "devices": "Apparaten",
+    "no_devices": "Geen apparaten",
+    "solar_production": "Zonneproductie",
+    "battery_status": "Batterij",
+    "charged": "Opgeladen",
+    "discharged": "Ontladen",
+    "returned_to_grid": "Teruglevering",
+    "self_sufficiency": "Zelfvoorzienend"
+  },
   "errors": {
     "entity_not_found": "Entiteit niet gevonden",
     "error_saving_layout": "Fout bij opslaan layout",
@@ -243,7 +269,9 @@
     "hide_ha_sidebar": "Home Assistant Zijbalk Verbergen",
     "weather_entity": "Weerentiteit",
     "search_weather_entity": "Zoek naar weerentiteiten...",
-    "weather_entity_description": "Selecteer een weerentiteit om een weersectie op het startscherm te tonen"
+    "weather_entity_description": "Selecteer een weerentiteit om een weersectie op het startscherm te tonen",
+    "show_energy": "Energiesectie Tonen",
+    "show_energy_description": "Toont een energieoverzichtskaart op het startscherm met huidig verbruik en dagelijks verbruiksgrafiek"
   },
   "status_messages": {
     "unavailable": "Niet beschikbaar",

@@ -3,11 +3,12 @@ import Sortable from 'sortablejs';
 import { localize } from './LocalizationService';
 import { RTLHelper } from './RTLHelper';
 import { injectLiquidGlassStyles, LiquidGlassClasses } from './LiquidGlassStyles';
+import { EnergySection } from '../sections/EnergySection';
 
 interface SectionItem {
   id: string;
   name: string;
-  type: 'area' | 'scenes' | 'cameras' | 'favorites' | 'weather';
+  type: 'area' | 'scenes' | 'cameras' | 'favorites' | 'weather' | 'energy';
   visible: boolean;
   order: number;
 }
@@ -54,34 +55,47 @@ export class SectionReorderManager {
       });
     }
 
+    const hasWeather = !!(weatherEntity && hass.states[weatherEntity]);
+
+    // Add Energy section if enabled and energy sensors exist
+    const showEnergy = await this.customizationManager.getShowEnergy();
+    const hasEnergy = showEnergy && EnergySection.hasEnergySensors(hass);
+    if (hasEnergy) {
+      sections.push({
+        id: 'energy_section',
+        name: localize('section_titles.energy'),
+        type: 'energy',
+        visible: !hiddenSections.includes('energy_section'),
+        order: sectionOrder.indexOf('energy_section') !== -1 ? sectionOrder.indexOf('energy_section') : (hasWeather ? 1 : 0)
+      });
+    }
+
     // Add Cameras section (first in default order)
     const cameraEntities = Object.values(hass.states).filter((state: any) => {
       if (!state.entity_id.startsWith('camera.')) {
         return false;
       }
-      
+
       // Check if entity is hidden in the entity registry
       const entityRegistry = hass.entities?.[state.entity_id];
       if (entityRegistry && entityRegistry.hidden_by) {
         return false;
       }
-      
+
       // Check if entity is disabled in the entity registry
       if (entityRegistry && entityRegistry.disabled_by) {
         return false;
       }
-      
+
       return true;
     });
-    
-    const hasWeather = !!(weatherEntity && hass.states[weatherEntity]);
     if (cameraEntities.length > 0) {
       sections.push({
         id: 'cameras_section',
         name: localize('section_titles.cameras'),
         type: 'cameras',
         visible: !hiddenSections.includes('cameras_section'),
-        order: sectionOrder.indexOf('cameras_section') !== -1 ? sectionOrder.indexOf('cameras_section') : (hasWeather ? 1 : 0)
+        order: sectionOrder.indexOf('cameras_section') !== -1 ? sectionOrder.indexOf('cameras_section') : (hasWeather ? 1 : 0) + (hasEnergy ? 1 : 0)
       });
     }
 
@@ -106,7 +120,7 @@ export class SectionReorderManager {
     });
     
     if (scenesEntities.length > 0) {
-      const baseOrder = (hasWeather ? 1 : 0) + (cameraEntities.length > 0 ? 1 : 0);
+      const baseOrder = (hasWeather ? 1 : 0) + (hasEnergy ? 1 : 0) + (cameraEntities.length > 0 ? 1 : 0);
       sections.push({
         id: 'scenes_section',
         name: localize('section_titles.scenes'),
@@ -119,7 +133,7 @@ export class SectionReorderManager {
     // Add Favorites section (third in default order)
     const favoriteAccessories = await this.customizationManager.getFavoriteAccessories();
     if (favoriteAccessories.length > 0) {
-      const baseOrder = (hasWeather ? 1 : 0) + (cameraEntities.length > 0 ? 1 : 0) + (scenesEntities.length > 0 ? 1 : 0);
+      const baseOrder = (hasWeather ? 1 : 0) + (hasEnergy ? 1 : 0) + (cameraEntities.length > 0 ? 1 : 0) + (scenesEntities.length > 0 ? 1 : 0);
       sections.push({
         id: 'favorites_section',
         name: localize('section_titles.favorites'),
@@ -134,6 +148,7 @@ export class SectionReorderManager {
       const areaId = area.area_id || area.id;
       const areaName = area.name || areaId;
       const baseOrder = (hasWeather ? 1 : 0) +
+                       (hasEnergy ? 1 : 0) +
                        (cameraEntities.length > 0 ? 1 : 0) +
                        (scenesEntities.length > 0 ? 1 : 0) +
                        (favoriteAccessories.length > 0 ? 1 : 0) +
@@ -170,6 +185,7 @@ export class SectionReorderManager {
     // Add Default Room if it exists
     if (hasDefaultRoom) {
       const defaultRoomOrder = (hasWeather ? 1 : 0) +
+                              (hasEnergy ? 1 : 0) +
                               (cameraEntities.length > 0 ? 1 : 0) +
                               (scenesEntities.length > 0 ? 1 : 0) +
                               (favoriteAccessories.length > 0 ? 1 : 0) +

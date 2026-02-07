@@ -72,6 +72,7 @@
     "water": "Вода",
     "media": "Колонки и ТВ",
     "vacuum": "Пылесосы",
+    "energy": "Энергия",
     "other": "Прочее"
   },
   "chip_status": {
@@ -125,7 +126,8 @@
     "favorites": "Избранное",
     "scenes": "Сцены",
     "cameras": "Камеры",
-    "weather": "Погода"
+    "weather": "Погода",
+    "energy": "Энергия"
   },
   "ui_actions": {
     "done": "Готово",
@@ -213,6 +215,30 @@
   "camera": {
     "no_snapshot_available": "Снимок недоступен"
   },
+  "energy": {
+    "current_usage": "Текущее потребление",
+    "today": "Сегодня",
+    "solar": "Солнечная",
+    "battery": "Батарея",
+    "grid_return": "Возврат в сеть",
+    "now": "СЕЙЧАС",
+    "active": "Активно",
+    "no_data": "Нет данных об энергии",
+    "day": "День",
+    "week": "Неделя",
+    "month": "Месяц",
+    "total_consumption": "Всего",
+    "cost": "Стоимость",
+    "vs_previous": "vs Предыд.",
+    "devices": "Устройства",
+    "no_devices": "Нет устройств",
+    "solar_production": "Солнечная генерация",
+    "battery_status": "Батарея",
+    "charged": "Заряжено",
+    "discharged": "Разряжено",
+    "returned_to_grid": "Возврат в сеть",
+    "self_sufficiency": "Автономность"
+  },
   "errors": {
     "entity_not_found": "Сущность не найдена",
     "error_saving_layout": "Ошибка сохранения макета",
@@ -245,7 +271,9 @@
     "hide_ha_sidebar": "Скрыть боковую панель Home Assistant",
     "weather_entity": "Объект погоды",
     "search_weather_entity": "Поиск объектов погоды...",
-    "weather_entity_description": "Выберите объект погоды для отображения раздела погоды на главном экране"
+    "weather_entity_description": "Выберите объект погоды для отображения раздела погоды на главном экране",
+    "show_energy": "Показать раздел энергии",
+    "show_energy_description": "Показывает карточку сводки энергии на главном экране с текущим потреблением и графиком дневного потребления"
   },
   "status_messages": {
     "unavailable": "Недоступно",

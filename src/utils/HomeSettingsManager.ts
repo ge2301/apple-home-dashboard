@@ -18,6 +18,7 @@ export interface HomeSettingsData {
   hideHeader?: boolean;
   hideSidebar?: boolean;
   showSwitches?: boolean;
+  showEnergy?: boolean;
 }
 
 export class HomeSettingsManager {
@@ -35,7 +36,8 @@ export class HomeSettingsManager {
     weatherEntity: undefined,
     backgroundType: 'preset',
     presetBackground: BackgroundManager.DEFAULT_BACKGROUND,
-    showSwitches: false
+    showSwitches: false,
+    showEnergy: false
   };
   private tempSettings: HomeSettingsData = {
     favoriteAccessories: [],
@@ -46,7 +48,8 @@ export class HomeSettingsManager {
     weatherEntity: undefined,
     backgroundType: 'preset',
     presetBackground: BackgroundManager.DEFAULT_BACKGROUND,
-    showSwitches: false
+    showSwitches: false,
+    showEnergy: false
   };
   private availableEntities: any[] = [];
   private allEntitiesForInclusion: any[] = [];
@@ -85,7 +88,8 @@ export class HomeSettingsManager {
       presetBackground: currentBackground.type === 'preset' ? currentBackground.backgroundImage : BackgroundManager.DEFAULT_BACKGROUND,
       hideHeader: customizations.ui?.hide_header || false,
       hideSidebar: customizations.ui?.hide_sidebar || false,
-      showSwitches: customizations.home?.show_switches || false
+      showSwitches: customizations.home?.show_switches || false,
+      showEnergy: customizations.home?.show_energy || false
     };
 
     // Create a copy for temporary editing
@@ -101,7 +105,8 @@ export class HomeSettingsManager {
       presetBackground: this.settings.presetBackground,
       hideHeader: this.settings.hideHeader,
       hideSidebar: this.settings.hideSidebar,
-      showSwitches: this.settings.showSwitches
+      showSwitches: this.settings.showSwitches,
+      showEnergy: this.settings.showEnergy
     };
     
     }
@@ -283,6 +288,18 @@ export class HomeSettingsManager {
           </div>
         </div>
         <p class="settings-section-description">${localize('settings.show_switches_cards_description')}</p>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-card switch-card">
+          <div class="switch-setting-row">
+            <span class="option-text">${localize('settings.show_energy')}</span>
+            <div class="ui-setting-toggle" id="energy-toggle">
+              <div class="toggle-switch"></div>
+            </div>
+          </div>
+        </div>
+        <p class="settings-section-description">${localize('settings.show_energy_description')}</p>
       </div>
 
       <div class="settings-section" id="included-switches-section" style="display: ${this.tempSettings.showSwitches ? 'none' : 'block'};">
@@ -1258,6 +1275,7 @@ export class HomeSettingsManager {
       JSON.stringify(this.settings.includedSwitches) !== JSON.stringify(this.tempSettings.includedSwitches) ||
       JSON.stringify(this.settings.extraAccessories) !== JSON.stringify(this.tempSettings.extraAccessories) ||
       this.settings.showSwitches !== this.tempSettings.showSwitches ||
+      this.settings.showEnergy !== this.tempSettings.showEnergy ||
       this.settings.weatherEntity !== this.tempSettings.weatherEntity;
     
     // Apply temporary settings to actual settings
@@ -1273,6 +1291,7 @@ export class HomeSettingsManager {
     this.settings.hideHeader = this.tempSettings.hideHeader;
     this.settings.hideSidebar = this.tempSettings.hideSidebar;
     this.settings.showSwitches = this.tempSettings.showSwitches;
+    this.settings.showEnergy = this.tempSettings.showEnergy;
 
     // Start modal fade immediately (while save happens in parallel)
     if (this.modal) {
@@ -1338,6 +1357,7 @@ export class HomeSettingsManager {
     home.extra_accessories = this.settings.extraAccessories;
     home.weather_entity = this.settings.weatherEntity;
     home.show_switches = this.settings.showSwitches;
+    home.show_energy = this.settings.showEnergy;
     
     const ui = this.customizationManager.getCustomization('ui') || {};
     ui.hide_header = this.settings.hideHeader;
@@ -1394,7 +1414,8 @@ export class HomeSettingsManager {
     const headerToggle = this.modal.querySelector('#header-toggle');
     const sidebarToggle = this.modal.querySelector('#sidebar-toggle');
     const switchesToggle = this.modal.querySelector('#switches-toggle');
-    
+    const energyToggle = this.modal.querySelector('#energy-toggle');
+
     headerToggle?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.tempSettings.hideHeader = !this.tempSettings.hideHeader;
@@ -1420,6 +1441,12 @@ export class HomeSettingsManager {
       
       // Refresh autocomplete results for all sections that might have switch entities visible
       this.refreshAutocompleteResults();
+    });
+
+    energyToggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.tempSettings.showEnergy = !this.tempSettings.showEnergy;
+      this.updateUIToggle('energy-toggle', this.tempSettings.showEnergy || false);
     });
 
     setTimeout(() => {
@@ -1475,6 +1502,7 @@ export class HomeSettingsManager {
     this.updateUIToggle('header-toggle', this.tempSettings.hideHeader || false);
     this.updateUIToggle('sidebar-toggle', this.tempSettings.hideSidebar || false);
     this.updateUIToggle('switches-toggle', this.tempSettings.showSwitches || false);
+    this.updateUIToggle('energy-toggle', this.tempSettings.showEnergy || false);
   }
 
   private openPresetsView() {

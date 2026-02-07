@@ -72,6 +72,7 @@
     "water": "Água",
     "media": "Alto-falantes e TVs",
     "vacuum": "Aspiradores",
+    "energy": "Energia",
     "other": "Outros"
   },
   "chip_status": {
@@ -125,7 +126,8 @@
     "favorites": "Favoritos",
     "scenes": "Cenas",
     "cameras": "Câmeras",
-    "weather": "Clima"
+    "weather": "Clima",
+    "energy": "Energia"
   },
   "ui_actions": {
     "done": "Concluído",
@@ -213,6 +215,30 @@
   "camera": {
     "no_snapshot_available": "Nenhuma captura disponível"
   },
+  "energy": {
+    "current_usage": "Consumo Atual",
+    "today": "Hoje",
+    "solar": "Solar",
+    "battery": "Bateria",
+    "grid_return": "Retorno à Rede",
+    "now": "AGORA",
+    "active": "Ativo",
+    "no_data": "Sem dados de energia",
+    "day": "Dia",
+    "week": "Semana",
+    "month": "Mês",
+    "total_consumption": "Total",
+    "cost": "Custo",
+    "vs_previous": "vs Anterior",
+    "devices": "Dispositivos",
+    "no_devices": "Sem dispositivos",
+    "solar_production": "Produção Solar",
+    "battery_status": "Bateria",
+    "charged": "Carregada",
+    "discharged": "Descarregada",
+    "returned_to_grid": "Retorno à Rede",
+    "self_sufficiency": "Autossuficiência"
+  },
   "errors": {
     "entity_not_found": "Entidade não encontrada",
     "error_saving_layout": "Erro ao salvar layout",
@@ -245,7 +271,9 @@
     "hide_ha_sidebar": "Ocultar Barra Lateral Home Assistant",
     "weather_entity": "Entidade do clima",
     "search_weather_entity": "Pesquisar entidades do clima...",
-    "weather_entity_description": "Selecione uma entidade do clima para exibir uma seção de clima na tela inicial"
+    "weather_entity_description": "Selecione uma entidade do clima para exibir uma seção de clima na tela inicial",
+    "show_energy": "Mostrar Seção de Energia",
+    "show_energy_description": "Mostra um cartão resumo de energia na tela inicial com consumo atual e gráfico de consumo diário"
   },
   "status_messages": {
     "unavailable": "Indisponível",

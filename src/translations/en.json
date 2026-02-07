@@ -72,6 +72,7 @@
     "water": "Water",
     "media": "Speakers & TVs",
     "vacuum": "Vacuums",
+    "energy": "Energy",
     "other": "Other"
   },
   "chip_status": {
@@ -122,7 +123,8 @@
     "favorites": "Favorites",
     "scenes": "Scenes",
     "cameras": "Cameras",
-    "weather": "Weather"
+    "weather": "Weather",
+    "energy": "Energy"
   },
   "ui_actions": {
     "done": "Done",
@@ -210,6 +212,30 @@
   "camera": {
     "no_snapshot_available": "No snapshot available"
   },
+  "energy": {
+    "current_usage": "Current Usage",
+    "today": "Today",
+    "solar": "Solar",
+    "battery": "Battery",
+    "grid_return": "Grid Return",
+    "now": "NOW",
+    "active": "Active",
+    "no_data": "No energy data",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "total_consumption": "Total",
+    "cost": "Cost",
+    "vs_previous": "vs Previous",
+    "devices": "Devices",
+    "no_devices": "No devices",
+    "solar_production": "Solar Production",
+    "battery_status": "Battery",
+    "charged": "Charged",
+    "discharged": "Discharged",
+    "returned_to_grid": "Grid Return",
+    "self_sufficiency": "Self-Sufficiency"
+  },
   "errors": {
     "entity_not_found": "Entity not found",
     "error_saving_layout": "Error saving layout",
@@ -242,7 +268,9 @@
     "hide_ha_sidebar": "Hide Home Assistant Sidebar",
     "weather_entity": "Weather Entity",
     "search_weather_entity": "Search for weather entities...",
-    "weather_entity_description": "Select a weather entity to display a weather section on the home screen"
+    "weather_entity_description": "Select a weather entity to display a weather section on the home screen",
+    "show_energy": "Show Energy Section",
+    "show_energy_description": "Show an energy summary card on the home screen with current usage and daily consumption chart"
   },
   "status_messages": {
     "unavailable": "Unavailable",

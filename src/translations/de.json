@@ -72,6 +72,7 @@
     "water": "Wasser",
     "media": "Lautsprecher & TVs",
     "vacuum": "Staubsauger",
+    "energy": "Energie",
     "other": "Andere"
   },
   "chip_status": {
@@ -125,7 +126,8 @@
     "favorites": "Favoriten",
     "scenes": "Szenen",
     "cameras": "Kameras",
-    "weather": "Wetter"
+    "weather": "Wetter",
+    "energy": "Energie"
   },
   "ui_actions": {
     "done": "Fertig",
@@ -213,6 +215,30 @@
   "camera": {
     "no_snapshot_available": "Keine Momentaufnahme verfügbar"
   },
+  "energy": {
+    "current_usage": "Aktueller Verbrauch",
+    "today": "Heute",
+    "solar": "Solar",
+    "battery": "Batterie",
+    "grid_return": "Netzeinspeisung",
+    "now": "JETZT",
+    "active": "Aktiv",
+    "no_data": "Keine Energiedaten",
+    "day": "Tag",
+    "week": "Woche",
+    "month": "Monat",
+    "total_consumption": "Gesamt",
+    "cost": "Kosten",
+    "vs_previous": "vs Vorherig",
+    "devices": "Geräte",
+    "no_devices": "Keine Geräte",
+    "solar_production": "Solarproduktion",
+    "battery_status": "Batterie",
+    "charged": "Geladen",
+    "discharged": "Entladen",
+    "returned_to_grid": "Netzeinspeisung",
+    "self_sufficiency": "Autarkie"
+  },
   "errors": {
     "entity_not_found": "Entität nicht gefunden",
     "error_saving_layout": "Fehler beim Speichern des Layouts",
@@ -245,7 +271,9 @@
     "hide_ha_sidebar": "Home Assistant Seitenleiste Verbergen",
     "weather_entity": "Wetter-Entität",
     "search_weather_entity": "Nach Wetter-Entitäten suchen...",
-    "weather_entity_description": "Wählen Sie eine Wetter-Entität aus, um einen Wetterbereich auf dem Startbildschirm anzuzeigen"
+    "weather_entity_description": "Wählen Sie eine Wetter-Entität aus, um einen Wetterbereich auf dem Startbildschirm anzuzeigen",
+    "show_energy": "Energiebereich anzeigen",
+    "show_energy_description": "Zeigt eine Energieübersichtskarte auf dem Startbildschirm mit aktuellem Verbrauch und Tagesverbrauchsdiagramm"
   },
   "status_messages": {
     "unavailable": "Nicht verfügbar",
