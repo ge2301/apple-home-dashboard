@@ -133,7 +133,8 @@ export class DashboardConfig {
     'binary_sensor': DeviceGroup.SECURITY, // Motion, occupancy, contact sensors
     'sensor': DeviceGroup.SECURITY,
     'vacuum': DeviceGroup.VACUUM, // Robot vacuums
-    'water_heater': DeviceGroup.CLIMATE // Water heaters, heat pumps, boilers
+    'water_heater': DeviceGroup.CLIMATE, // Water heaters, heat pumps, boilers
+    'valve': DeviceGroup.WATER // Garden valves, irrigation, water shutoff
   };
 
   // =====================================================================
@@ -145,7 +146,7 @@ export class DashboardConfig {
    */
   static readonly SUPPORTED_DOMAINS = [
     'light', 'switch', 'cover', 'climate', 'fan', 'media_player',
-    'lock', 'alarm_control_panel', 'scene', 'script', 'camera', 'vacuum', 'water_heater'
+    'lock', 'alarm_control_panel', 'scene', 'script', 'camera', 'vacuum', 'water_heater', 'valve'
   ] as const;
 
   /**
