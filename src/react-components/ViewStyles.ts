@@ -37,22 +37,43 @@ export const viewStyles = `
   position: relative;
 }
 
+.page-content.has-fixed-header .permanent-chips {
+  margin-top: 8px;
+}
+
 /* Align overlay buttons inward so they sit flush with the content grid.
-   The header spans edge-to-edge, so we push buttons inward by the page
-   padding (~22px) plus extra inset for visual alignment with card edges. */
+   Home-page header is inside the padded :host, so only needs 25px inset.
+   Group-page header is position:fixed from viewport edge, so needs
+   host padding + 25px to match the same visual position. */
 .apple-home-header .apple-header-sidebar-button,
 .apple-home-header .apple-header-back-button {
-  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+  left: 25px !important;
 }
 .apple-home-header .apple-header-menu-button {
+  right: 25px !important;
+}
+.apple-home-header.group-page .apple-header-sidebar-button,
+.apple-home-header.group-page .apple-header-back-button {
+  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+}
+.apple-home-header.group-page .apple-header-menu-button {
   right: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header.rtl .apple-header-sidebar-button,
 .apple-home-header.rtl .apple-header-back-button {
   left: auto !important;
-  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+  right: 25px !important;
 }
 .apple-home-header.rtl .apple-header-menu-button {
+  right: auto !important;
+  left: 25px !important;
+}
+.apple-home-header.group-page.rtl .apple-header-sidebar-button,
+.apple-home-header.group-page.rtl .apple-header-back-button {
+  left: auto !important;
+  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+}
+.apple-home-header.group-page.rtl .apple-header-menu-button {
   right: auto !important;
   left: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
