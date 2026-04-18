@@ -91,7 +91,7 @@ export class DashboardConfig {
     },
     [DeviceGroup.WATER]: {
       iconColor: '#0b78f6', // Dark blue for water devices
-      icon: 'mdi:water-outline',
+      icon: 'mdi:water',
       name: () => localize('groups.water')
     },
     [DeviceGroup.MEDIA]: {

@@ -110,7 +110,7 @@ export class AppleHomeView extends HTMLElement {
   }
 
   async setConfig(config: any) {
-    if (this._config && JSON.stringify(this._config) === JSON.stringify(config)) {
+    if (this._rendered && this._config && JSON.stringify(this._config) === JSON.stringify(config)) {
       return;
     }
 
