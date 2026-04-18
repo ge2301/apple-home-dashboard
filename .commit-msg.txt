@@ -1,8 +1,0 @@
-fix: push overlay buttons 25px inward, correct camera tile gap calculation
-
-- Increase button inset to page-padding + 3px with higher specificity
-  selectors (.apple-home-header .button) to reliably override the
-  AppleHeader base styles that may load after ViewStyles in the Shadow DOM
-- Fix camera tile width formula: use the actual camera grid gap (2px)
-  instead of the general --card-gap (10px), closing the ~8px gap that
-  made tiles appear 10px too narrow on mobile

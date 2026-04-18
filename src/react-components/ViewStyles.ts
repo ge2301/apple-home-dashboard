@@ -42,19 +42,19 @@ export const viewStyles = `
    padding (~22px) plus extra inset for visual alignment with card edges. */
 .apple-home-header .apple-header-sidebar-button,
 .apple-home-header .apple-header-back-button {
-  left: calc(var(--apple-page-padding, 22px) + 3px) !important;
+  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header .apple-header-menu-button {
-  right: calc(var(--apple-page-padding, 22px) + 3px) !important;
+  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header.rtl .apple-header-sidebar-button,
 .apple-home-header.rtl .apple-header-back-button {
   left: auto !important;
-  right: calc(var(--apple-page-padding, 22px) + 3px) !important;
+  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header.rtl .apple-header-menu-button {
   right: auto !important;
-  left: calc(var(--apple-page-padding, 22px) + 3px) !important;
+  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 
 .apple-page-title {
