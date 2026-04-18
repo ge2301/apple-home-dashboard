@@ -28,12 +28,25 @@ export const viewStyles = `
 .wrapper-content {
   width: 100%;
   max-width: none;
+  overflow-x: hidden;
 }
 
 .permanent-chips {
   display: block;
   width: 100%;
   position: relative;
+}
+
+/* Override header width/margin when mounted via React bridge.
+   The imperative AppleHeader CSS expands the header beyond the
+   page-padding with negative margins, which breaks absolute button
+   positioning inside the Shadow DOM layout. Keep it flush instead. */
+.apple-home-header.permanent-header,
+.permanent-header .apple-home-header {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .apple-page-title {

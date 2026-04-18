@@ -63,7 +63,6 @@ export function HomePageReact({ title }: HomePageReactProps) {
 
   return (
     <motion.div variants={sectionVariants}>
-      <h1 className="apple-page-title">{title}</h1>
       <div ref={containerRef} />
     </motion.div>
   );

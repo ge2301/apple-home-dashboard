@@ -1,0 +1,9 @@
+fix: resolve duplicate title, mispositioned buttons, and camera overflow
+
+- Remove duplicate "Home" h1 from HomePageReact (the imperative
+  HomePage.render() already creates the title via createHomeTitle)
+- Override AppleHeader negative-margin width expansion on .permanent-header
+  so absolute-positioned sidebar/menu buttons stay within the visible
+  viewport instead of shifting off-screen by the page-padding offset
+- Add overflow-x:hidden on .wrapper-content to clip camera carousel
+  tiles that extend beyond the right edge on narrow mobile viewports
