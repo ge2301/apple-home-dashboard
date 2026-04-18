@@ -37,16 +37,37 @@ export const viewStyles = `
   position: relative;
 }
 
-.page-content.has-fixed-header .permanent-chips {
+/* Chip margin in group/filter view: use sibling selector because
+   has-fixed-header class is added to the header div, not .page-content. */
+.apple-home-header.group-page ~ .permanent-chips {
   margin-top: 16px;
 }
 
-/* Align overlay buttons flush with the content grid.
-   Home header: sticky with margin-left:-22px (edge-to-edge via CSS).
-     Buttons need page-padding + extra to align with cards.
-   Group header: position:fixed, left set by JS to panel edge.
-     Buttons only need page-padding since header already starts at panel edge.
-   Mobile: slightly smaller inset to avoid clipping. */
+/* Group page fixed header: push subsequent content down.
+   The has-fixed-header class never lands on .page-content (it goes onto
+   the header div), so we use :has() to target the correct parent. */
+.page-content:has(> .apple-home-header.group-page) {
+  padding-top: 68px;
+}
+@media (max-width: 768px) {
+  .page-content:has(> .apple-home-header.group-page) {
+    padding-top: 60px;
+  }
+}
+@media (max-width: 359px) {
+  .page-content:has(> .apple-home-header.group-page) {
+    padding-top: 50px;
+  }
+}
+
+/* Overlay button positioning.
+   Home header (sticky): margin-left:-Xpx makes it edge-to-edge.
+     Buttons need padding+25px from header edge to sit 25px inward of cards.
+   Group header (fixed, JS-positioned to panel edge):
+     Buttons need only host-padding from header edge to align with cards.
+   No per-breakpoint overrides needed: the value is the same since
+   host padding (22px) stays constant and the header's own .apple-header-content
+   padding tracks its negative margin automatically. */
 .apple-home-header .apple-header-sidebar-button,
 .apple-home-header .apple-header-back-button {
   left: calc(var(--apple-page-padding, 22px) + 25px) !important;
@@ -78,60 +99,6 @@ export const viewStyles = `
 .apple-home-header.group-page.rtl .apple-header-menu-button {
   right: auto !important;
   left: var(--apple-page-padding, 22px) !important;
-}
-@media (max-width: 768px) {
-  .apple-home-header .apple-header-sidebar-button,
-  .apple-home-header .apple-header-back-button {
-    left: calc(16px + 25px) !important;
-  }
-  .apple-home-header .apple-header-menu-button {
-    right: calc(16px + 25px) !important;
-  }
-  .apple-home-header.rtl .apple-header-sidebar-button,
-  .apple-home-header.rtl .apple-header-back-button {
-    left: auto !important;
-    right: calc(16px + 25px) !important;
-  }
-  .apple-home-header.rtl .apple-header-menu-button {
-    right: auto !important;
-    left: calc(16px + 25px) !important;
-  }
-}
-@media (max-width: 479px) {
-  .apple-home-header .apple-header-sidebar-button,
-  .apple-home-header .apple-header-back-button {
-    left: calc(12px + 25px) !important;
-  }
-  .apple-home-header .apple-header-menu-button {
-    right: calc(12px + 25px) !important;
-  }
-  .apple-home-header.rtl .apple-header-sidebar-button,
-  .apple-home-header.rtl .apple-header-back-button {
-    left: auto !important;
-    right: calc(12px + 25px) !important;
-  }
-  .apple-home-header.rtl .apple-header-menu-button {
-    right: auto !important;
-    left: calc(12px + 25px) !important;
-  }
-}
-@media (max-width: 359px) {
-  .apple-home-header .apple-header-sidebar-button,
-  .apple-home-header .apple-header-back-button {
-    left: calc(10px + 25px) !important;
-  }
-  .apple-home-header .apple-header-menu-button {
-    right: calc(10px + 25px) !important;
-  }
-  .apple-home-header.rtl .apple-header-sidebar-button,
-  .apple-home-header.rtl .apple-header-back-button {
-    left: auto !important;
-    right: calc(10px + 25px) !important;
-  }
-  .apple-home-header.rtl .apple-header-menu-button {
-    right: auto !important;
-    left: calc(10px + 25px) !important;
-  }
 }
 
 .apple-page-title {
