@@ -38,7 +38,7 @@ export const viewStyles = `
 }
 
 .page-content.has-fixed-header .permanent-chips {
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 /* Align overlay buttons flush with the content grid.
@@ -82,19 +82,55 @@ export const viewStyles = `
 @media (max-width: 768px) {
   .apple-home-header .apple-header-sidebar-button,
   .apple-home-header .apple-header-back-button {
-    left: calc(var(--apple-page-padding, 22px) + 6px) !important;
+    left: calc(16px + 25px) !important;
   }
   .apple-home-header .apple-header-menu-button {
-    right: calc(var(--apple-page-padding, 22px) + 6px) !important;
+    right: calc(16px + 25px) !important;
   }
   .apple-home-header.rtl .apple-header-sidebar-button,
   .apple-home-header.rtl .apple-header-back-button {
     left: auto !important;
-    right: calc(var(--apple-page-padding, 22px) + 6px) !important;
+    right: calc(16px + 25px) !important;
   }
   .apple-home-header.rtl .apple-header-menu-button {
     right: auto !important;
-    left: calc(var(--apple-page-padding, 22px) + 6px) !important;
+    left: calc(16px + 25px) !important;
+  }
+}
+@media (max-width: 479px) {
+  .apple-home-header .apple-header-sidebar-button,
+  .apple-home-header .apple-header-back-button {
+    left: calc(12px + 25px) !important;
+  }
+  .apple-home-header .apple-header-menu-button {
+    right: calc(12px + 25px) !important;
+  }
+  .apple-home-header.rtl .apple-header-sidebar-button,
+  .apple-home-header.rtl .apple-header-back-button {
+    left: auto !important;
+    right: calc(12px + 25px) !important;
+  }
+  .apple-home-header.rtl .apple-header-menu-button {
+    right: auto !important;
+    left: calc(12px + 25px) !important;
+  }
+}
+@media (max-width: 359px) {
+  .apple-home-header .apple-header-sidebar-button,
+  .apple-home-header .apple-header-back-button {
+    left: calc(10px + 25px) !important;
+  }
+  .apple-home-header .apple-header-menu-button {
+    right: calc(10px + 25px) !important;
+  }
+  .apple-home-header.rtl .apple-header-sidebar-button,
+  .apple-home-header.rtl .apple-header-back-button {
+    left: auto !important;
+    right: calc(10px + 25px) !important;
+  }
+  .apple-home-header.rtl .apple-header-menu-button {
+    right: auto !important;
+    left: calc(10px + 25px) !important;
   }
 }
 
