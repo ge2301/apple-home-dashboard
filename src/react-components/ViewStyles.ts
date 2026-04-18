@@ -37,38 +37,20 @@ export const viewStyles = `
   position: relative;
 }
 
-/* Overlay button positioning.
-   Home: 47px = content_padding(22) + 25px inset from card edge.
-   Group: host_padding only (header JS-positioned to panel edge). */
+/* Overlay button positioning — one value for all views. */
 .apple-home-header .apple-header-sidebar-button,
 .apple-home-header .apple-header-back-button {
-  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
-}
-.apple-home-header .apple-header-menu-button {
-  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
-}
-.apple-home-header.group-page .apple-header-sidebar-button,
-.apple-home-header.group-page .apple-header-back-button {
   left: var(--apple-page-padding, 22px) !important;
 }
-.apple-home-header.group-page .apple-header-menu-button {
+.apple-home-header .apple-header-menu-button {
   right: var(--apple-page-padding, 22px) !important;
 }
 .apple-home-header.rtl .apple-header-sidebar-button,
 .apple-home-header.rtl .apple-header-back-button {
   left: auto !important;
-  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
-}
-.apple-home-header.rtl .apple-header-menu-button {
-  right: auto !important;
-  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
-}
-.apple-home-header.group-page.rtl .apple-header-sidebar-button,
-.apple-home-header.group-page.rtl .apple-header-back-button {
-  left: auto !important;
   right: var(--apple-page-padding, 22px) !important;
 }
-.apple-home-header.group-page.rtl .apple-header-menu-button {
+.apple-home-header.rtl .apple-header-menu-button {
   right: auto !important;
   left: var(--apple-page-padding, 22px) !important;
 }
