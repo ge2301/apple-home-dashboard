@@ -204,10 +204,10 @@ export class BackgroundManager {
       body::after {
         content: "";
         position: fixed;
-        top: -60px;
-        left: -60px;
-        height: calc(100vh + 120px);
-        width: calc(100vw + 120px);
+        top: -100px;
+        left: -100px;
+        height: calc(100vh + 200px);
+        width: calc(100vw + 200px);
         z-index: -1;
         background: ${backgroundStyle} center center;
         background-size: cover;
