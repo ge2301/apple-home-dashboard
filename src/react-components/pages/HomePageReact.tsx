@@ -20,6 +20,7 @@ export function HomePageReact({ title }: HomePageReactProps) {
   const mountedRef = useRef(false);
 
   useEffect(() => {
+    console.log('[HomePageReact] mount effect, container:', !!containerRef.current, 'hass:', !!hassRef.current, 'title:', title);
     if (!containerRef.current || !hassRef.current) return;
     const hass = hassRef.current;
 

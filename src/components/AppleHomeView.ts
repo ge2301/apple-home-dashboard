@@ -60,9 +60,11 @@ export class AppleHomeView extends HTMLElement {
       this.classList.toggle('edit-mode', mode);
       this.renderReact();
     };
+    console.log('[AHV] constructor, dashboardKey:', this.currentDashboardKey);
   }
 
   connectedCallback() {
+    console.log('[AHV] connectedCallback');
     this.visibilityChangeHandler = () => {
       if (!document.hidden && this._hass) {
         this.pushHassUpdate();
@@ -84,6 +86,7 @@ export class AppleHomeView extends HTMLElement {
   }
 
   disconnectedCallback() {
+    console.log('[AHV] disconnectedCallback, pageType:', this.config?.pageType);
     if (this.visibilityChangeHandler) {
       document.removeEventListener('visibilitychange', this.visibilityChangeHandler);
     }
@@ -110,6 +113,7 @@ export class AppleHomeView extends HTMLElement {
   }
 
   async setConfig(config: any) {
+    console.log('[AHV] setConfig called, pageType:', config?.pageType, 'hasHass:', !!this._hass, 'hasReactBridge:', !!this.reactBridge);
     this._rendered = false;
     this.config = config;
 
@@ -146,6 +150,7 @@ export class AppleHomeView extends HTMLElement {
     this._lastLanguage = currentLanguage;
 
     if (!oldHass) {
+      console.log('[AHV] set hass: first hass, pageType:', this.config?.pageType);
       this.loadAndApplyCustomizations();
       this.ensureShadowRoot();
       this.renderReact();
@@ -220,12 +225,17 @@ export class AppleHomeView extends HTMLElement {
    * hass-only updates go through pushHassUpdate() → bumpHass().
    */
   private renderReact() {
-    if (!this._hass || !this.config) return;
+    if (!this._hass || !this.config) {
+      console.log('[AHV] renderReact: SKIPPED (no hass or config)', 'hass:', !!this._hass, 'config:', !!this.config);
+      return;
+    }
 
     this.ensureShadowRoot();
 
     const nextConfig = this.buildViewConfig();
-    if (this.viewConfigChanged(this._viewConfig, nextConfig)) {
+    const configChanged = this.viewConfigChanged(this._viewConfig, nextConfig);
+    console.log('[AHV] renderReact: pageType:', nextConfig.pageType, 'configChanged:', configChanged, 'hasReactBridge:', !!this.reactBridge);
+    if (configChanged) {
       this._viewConfig = nextConfig;
     }
 
