@@ -830,7 +830,7 @@ export class AppleChips {
   }
 
   private navigateToHomePage() {
-    window.history.back();
+    this.navigateToPath('home');
   }
 
   private getGroupStatusText(group: DeviceGroup, entities: EntityState[]): string {

@@ -17,17 +17,11 @@ export function HomePageReact({ title }: HomePageReactProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HomePage | null>(null);
   const dndRef = useRef<DragAndDropManager | null>(null);
-  const renderedKeyRef = useRef<string>('');
+  const mountedRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current || !hassRef.current) return;
     const hass = hassRef.current;
-
-    const renderKey = `${title}|${JSON.stringify(customizationManager?.getCustomizations?.() || {})}`;
-    if (renderKey === renderedKeyRef.current && containerRef.current.childElementCount > 0) {
-      return;
-    }
-    renderedKeyRef.current = renderKey;
 
     if (!pageRef.current) {
       pageRef.current = new HomePage();
@@ -49,11 +43,15 @@ export function HomePageReact({ title }: HomePageReactProps) {
 
     containerRef.current.innerHTML = '';
     page.render(containerRef.current, hass, title, () => {});
+    mountedRef.current = true;
   }, [title, customizationManager]);
 
   useEffect(() => {
-    if (!containerRef.current || !hassRef.current) return;
+    if (!mountedRef.current || !containerRef.current || !hassRef.current) return;
     const hass = hassRef.current;
+    if (pageRef.current) {
+      pageRef.current.hass = hass;
+    }
     const cards = containerRef.current.querySelectorAll('apple-home-card');
     cards.forEach((card: any) => { card.hass = hass; });
   }, [hassVersion]);

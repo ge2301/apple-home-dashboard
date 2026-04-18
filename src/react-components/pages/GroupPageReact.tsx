@@ -15,17 +15,11 @@ export function GroupPageReact({ deviceGroup }: GroupPageReactProps) {
   const customizationManager = useCustomizationManager();
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<GroupPage | null>(null);
-  const renderedKeyRef = useRef<string>('');
+  const mountedRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current || !hassRef.current) return;
     const hass = hassRef.current;
-
-    const renderKey = `${deviceGroup}`;
-    if (renderKey === renderedKeyRef.current && containerRef.current.childElementCount > 0) {
-      return;
-    }
-    renderedKeyRef.current = renderKey;
 
     if (!pageRef.current) {
       pageRef.current = new GroupPage();
@@ -40,11 +34,15 @@ export function GroupPageReact({ deviceGroup }: GroupPageReactProps) {
 
     containerRef.current.innerHTML = '';
     page.render(containerRef.current, deviceGroup, hass, () => {});
+    mountedRef.current = true;
   }, [deviceGroup, customizationManager]);
 
   useEffect(() => {
-    if (!containerRef.current || !hassRef.current) return;
+    if (!mountedRef.current || !containerRef.current || !hassRef.current) return;
     const hass = hassRef.current;
+    if (pageRef.current) {
+      pageRef.current.hass = hass;
+    }
     const cards = containerRef.current.querySelectorAll('apple-home-card');
     cards.forEach((card: any) => { card.hass = hass; });
   }, [hassVersion]);

@@ -10,16 +10,11 @@ export function CamerasPageReact() {
   const customizationManager = useCustomizationManager();
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<CamerasPage | null>(null);
-  const renderedRef = useRef(false);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current || !hassRef.current) return;
     const hass = hassRef.current;
-
-    if (renderedRef.current && containerRef.current.childElementCount > 0) {
-      return;
-    }
-    renderedRef.current = true;
 
     if (!pageRef.current) {
       pageRef.current = new CamerasPage();
@@ -33,10 +28,11 @@ export function CamerasPageReact() {
 
     containerRef.current.innerHTML = '';
     page.render(containerRef.current, hass, () => {});
+    mountedRef.current = true;
   }, [customizationManager]);
 
   useEffect(() => {
-    if (!containerRef.current || !hassRef.current) return;
+    if (!mountedRef.current || !containerRef.current || !hassRef.current) return;
     const hass = hassRef.current;
     const cards = containerRef.current.querySelectorAll('apple-home-card');
     cards.forEach((card: any) => { card.hass = hass; });
