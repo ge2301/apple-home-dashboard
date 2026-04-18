@@ -37,24 +37,24 @@ export const viewStyles = `
   position: relative;
 }
 
-/* Align overlay buttons with the page content edge.
-   The header extends edge-to-edge via negative margin, but the buttons
-   should line up with the padded content area, not the screen edge. */
-.apple-header-sidebar-button,
-.apple-header-back-button {
-  left: var(--apple-page-padding, 22px) !important;
+/* Align overlay buttons inward so they sit flush with the content grid.
+   The header spans edge-to-edge, so we push buttons inward by the page
+   padding (~22px) plus extra inset for visual alignment with card edges. */
+.apple-home-header .apple-header-sidebar-button,
+.apple-home-header .apple-header-back-button {
+  left: calc(var(--apple-page-padding, 22px) + 3px) !important;
 }
-.apple-header-menu-button {
-  right: var(--apple-page-padding, 22px) !important;
+.apple-home-header .apple-header-menu-button {
+  right: calc(var(--apple-page-padding, 22px) + 3px) !important;
 }
 .apple-home-header.rtl .apple-header-sidebar-button,
 .apple-home-header.rtl .apple-header-back-button {
   left: auto !important;
-  right: var(--apple-page-padding, 22px) !important;
+  right: calc(var(--apple-page-padding, 22px) + 3px) !important;
 }
 .apple-home-header.rtl .apple-header-menu-button {
   right: auto !important;
-  left: var(--apple-page-padding, 22px) !important;
+  left: calc(var(--apple-page-padding, 22px) + 3px) !important;
 }
 
 .apple-page-title {
@@ -431,7 +431,7 @@ apple-home-card {
   .cameras-grid .entity-card-wrapper { grid-row: span 2; }
   .carousel-grid .entity-card-wrapper { width: calc(46% - 6px); }
   .carousel-grid.scenes .entity-card-wrapper { flex: 0 0 calc((100cqw - var(--card-gap, 10px)) / 2 * 0.9); }
-  .carousel-grid.cameras .entity-card-wrapper { height: var(--apple-camera-height, 220px); flex: 0 0 calc((100cqw - var(--card-gap, 10px)) / 2); }
+  .carousel-grid.cameras .entity-card-wrapper { height: var(--apple-camera-height, 220px); flex: 0 0 calc((100cqw - 2px) / 2); }
   .entity-controls { top: -10px; right: -10px; gap: 6px; }
   .entity-control-btn { font-size: 14px; padding: 0; }
 }
@@ -443,7 +443,7 @@ apple-home-card {
   .entity-card-wrapper, .room-group-grid .entity-card-wrapper, .scenes-grid .entity-card-wrapper { grid-column: span var(--apple-card-span-mobile, 6); }
   .cameras-grid .entity-card-wrapper { grid-column: span 12; grid-row: span 2; }
   .carousel-grid.scenes .entity-card-wrapper { flex: 0 0 calc((100cqw - var(--card-gap, 8px)) / 2 * 0.9); }
-  .carousel-grid.cameras .entity-card-wrapper { height: var(--apple-camera-height, 220px); flex: 0 0 calc((100cqw - var(--card-gap, 8px)) / 2); }
+  .carousel-grid.cameras .entity-card-wrapper { height: var(--apple-camera-height, 220px); flex: 0 0 calc((100cqw - 2px) / 2); }
 }
 
 @container apple-home-view (max-width: 315px) {
