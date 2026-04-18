@@ -82,8 +82,8 @@ export class AppleHomeView extends HTMLElement {
     this.setupRTLChangeDetection();
     this.setCurrentActiveInstance(this);
 
-    if (this._hass && this.config && !this.reactBridge) {
-      this.renderReact();
+    if (this._hass && this.reactBridge) {
+      this.pushHassUpdate();
     }
   }
 
@@ -105,11 +105,6 @@ export class AppleHomeView extends HTMLElement {
     if (this._hassUpdateTimer) {
       clearTimeout(this._hassUpdateTimer);
       this._hassUpdateTimer = undefined;
-    }
-
-    if (this.reactBridge) {
-      this.reactBridge.unmount();
-      this.reactBridge = undefined;
     }
   }
 
