@@ -1,13 +1,10 @@
-fix: revert broken button/chip overrides, properly handle camera and page overflow
+fix: align overlay buttons with content edge, scale camera tiles for mobile
 
-Reverts the previous width/margin override on .permanent-header that
-pushed overlay buttons too far inward, and the overflow-x:hidden on
-.wrapper-content that clipped horizontally-scrolling chips and carousels.
-
-Instead:
-- Use overflow-x:clip on :host to prevent page-level horizontal scroll
-  from edge-to-edge elements (carousels, chips) without creating a new
-  scroll container that would break nested overflow-x:auto carousels
-- Scale the smallest-viewport camera tile to account for page padding
-  (100cqw - 2 * page-padding) so it fits within the visible carousel area
-  instead of overflowing with clipped rounded corners
+- Move sidebar/back/menu buttons inward to align with the page content
+  edge (left/right: var(--apple-page-padding)) instead of the screen
+  edge, so they sit flush with titles and card grids
+- Remove the 1.1x overflow multiplier on camera carousel tiles in
+  mobile breakpoints (356-555px, 316-355px) so tiles fit within the
+  visible carousel area and rounded corners remain fully visible
+- Restore 100cqw for the smallest breakpoint (<=315px) where a single
+  tile fills the full content width without overflow
