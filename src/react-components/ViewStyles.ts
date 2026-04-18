@@ -37,12 +37,9 @@ export const viewStyles = `
   position: relative;
 }
 
-/* Chip margin & content padding in group/filter view.
-   The inner header gets .group-page; the outer wrapper gets .is-group-page
-   (set by AppleHeaderReact) so sibling selectors work. */
-.is-group-page ~ .permanent-chips {
-  margin-top: 16px;
-}
+/* Group/filter view: push content below the fixed header.
+   The outer wrapper gets .is-group-page (set by AppleHeaderReact)
+   so :has() can target the parent .page-content. */
 .page-content:has(> .is-group-page) {
   padding-top: 68px;
 }
