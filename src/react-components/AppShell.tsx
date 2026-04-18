@@ -57,7 +57,7 @@ export function AppShell() {
 
   return (
     <div className={`wrapper-content ${isRTL ? 'rtl' : 'ltr'}`}>
-      <div className="page-content">
+      <div className={`page-content${isGroupPage ? ' has-fixed-header' : ''}`}>
         <AppleHeaderReact
           title={config.title || ''}
           isGroupPage={isGroupPage}

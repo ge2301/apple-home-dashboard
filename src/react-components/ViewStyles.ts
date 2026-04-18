@@ -37,24 +37,15 @@ export const viewStyles = `
   position: relative;
 }
 
-/* Group/filter view: push content below the fixed header.
-   The header is ~44px tall; add a small gap below. */
-.page-content:has(> .is-group-page) {
-  padding-top: 52px;
-}
-
-/* Overlay button positioning — single value, no breakpoint overrides.
-   Buttons use position:absolute inside .apple-header-content (position:relative).
-   The value 25px places buttons consistently on every screen:
-   .apple-header-content padding always equals the header's negative margin,
-   so left:25px = content_padding + 25 from header edge
-                = host_padding + 25 from viewport (constant). */
+/* Overlay button positioning.
+   Home: 47px = content_padding(22) + 25px inset from card edge.
+   Group: host_padding only (header JS-positioned to panel edge). */
 .apple-home-header .apple-header-sidebar-button,
 .apple-home-header .apple-header-back-button {
-  left: 25px !important;
+  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header .apple-header-menu-button {
-  right: 25px !important;
+  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header.group-page .apple-header-sidebar-button,
 .apple-home-header.group-page .apple-header-back-button {
@@ -66,11 +57,11 @@ export const viewStyles = `
 .apple-home-header.rtl .apple-header-sidebar-button,
 .apple-home-header.rtl .apple-header-back-button {
   left: auto !important;
-  right: 25px !important;
+  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header.rtl .apple-header-menu-button {
   right: auto !important;
-  left: 25px !important;
+  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
 }
 .apple-home-header.group-page.rtl .apple-header-sidebar-button,
 .apple-home-header.group-page.rtl .apple-header-back-button {

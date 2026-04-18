@@ -68,5 +68,5 @@ export function AppleHeaderReact({ title, isGroupPage, isSpecialPage, showBackBu
     }
   }, [title, config.pageType, config.areaName]);
 
-  return <div ref={containerRef} className={`apple-home-header permanent-header${isGroupPage ? ' is-group-page' : ''}`} />;
+  return <div ref={containerRef} className="apple-home-header permanent-header" />;
 }
