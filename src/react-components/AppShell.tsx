@@ -20,8 +20,6 @@ export function AppShell() {
   const pageType = config.pageType || 'home';
   const pageKey = `${pageType}-${config.areaId || config.deviceGroup || 'default'}`;
 
-  console.log('[AppShell] render, pageType:', pageType, 'pageKey:', pageKey);
-
   const isGroupPage = pageType === 'group';
   const isSpecialPage = ['room', 'scenes', 'cameras'].includes(pageType);
   const showChips = !isSpecialPage;
