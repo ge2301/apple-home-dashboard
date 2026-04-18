@@ -15,6 +15,7 @@ export const viewStyles = `
   container-name: apple-home-view;
   --card-gap: var(--apple-card-gap, 10px);
   --section-margin: var(--apple-section-gap, 20px);
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -28,25 +29,12 @@ export const viewStyles = `
 .wrapper-content {
   width: 100%;
   max-width: none;
-  overflow-x: hidden;
 }
 
 .permanent-chips {
   display: block;
   width: 100%;
   position: relative;
-}
-
-/* Override header width/margin when mounted via React bridge.
-   The imperative AppleHeader CSS expands the header beyond the
-   page-padding with negative margins, which breaks absolute button
-   positioning inside the Shadow DOM layout. Keep it flush instead. */
-.apple-home-header.permanent-header,
-.permanent-header .apple-home-header {
-  width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  box-sizing: border-box !important;
 }
 
 .apple-page-title {
@@ -444,7 +432,7 @@ apple-home-card {
   .area-title, .apple-home-section-title, .room-group-title { font-size: 15px; margin-top: 14px; }
   .entity-card-wrapper, .room-group-grid .entity-card-wrapper, .scenes-grid .entity-card-wrapper, .cameras-grid .entity-card-wrapper { grid-column: span var(--apple-card-span-xs, 12) !important; }
   .carousel-grid.scenes .entity-card-wrapper { flex: 0 0 calc(100cqw * 0.9); }
-  .carousel-grid.cameras .entity-card-wrapper { height: var(--apple-camera-height, 220px); flex: 0 0 100cqw; }
+  .carousel-grid.cameras .entity-card-wrapper { height: var(--apple-camera-height, 220px); flex: 0 0 calc(100cqw - 2 * var(--apple-page-padding, 22px)); }
   .carousel-grid .entity-card-wrapper { max-width: 100%; }
 }
 
