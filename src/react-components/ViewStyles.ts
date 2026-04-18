@@ -38,39 +38,23 @@ export const viewStyles = `
 }
 
 /* Group/filter view: push content below the fixed header.
-   The outer wrapper gets .is-group-page (set by AppleHeaderReact)
-   so :has() can target the parent .page-content. */
+   The header is ~44px tall; add a small gap below. */
 .page-content:has(> .is-group-page) {
-  padding-top: 68px;
-}
-@media (max-width: 768px) {
-  .page-content:has(> .is-group-page) { padding-top: 60px; }
-}
-@media (max-width: 359px) {
-  .page-content:has(> .is-group-page) { padding-top: 50px; }
+  padding-top: 52px;
 }
 
-/* Overlay button positioning.
-   Buttons are position:absolute inside .apple-header-content (position:relative).
-   left/right values are from .apple-header-content's padding-box edge,
-   which equals the inner .apple-home-header's left edge.
-
-   Home header (sticky): negative margin shifts header left of :host content.
-     header_left = host_padding - |header_margin|.
-     To place buttons 25px inward of cards (cards_left = host_padding):
-       button_left = |header_margin| + 25px.
-   Group header (fixed, JS-positioned to panel edge):
-     header_left = panel_left. Cards at panel_left + host_padding.
-       button_left = host_padding (flush with cards, no extra inset).
-
-   Desktop: header_margin = 22px → 47px.
-   Per-breakpoint overrides correct for smaller margins on mobile. */
+/* Overlay button positioning — single value, no breakpoint overrides.
+   Buttons use position:absolute inside .apple-header-content (position:relative).
+   The value 25px places buttons consistently on every screen:
+   .apple-header-content padding always equals the header's negative margin,
+   so left:25px = content_padding + 25 from header edge
+                = host_padding + 25 from viewport (constant). */
 .apple-home-header .apple-header-sidebar-button,
 .apple-home-header .apple-header-back-button {
-  left: 47px !important;
+  left: 25px !important;
 }
 .apple-home-header .apple-header-menu-button {
-  right: 47px !important;
+  right: 25px !important;
 }
 .apple-home-header.group-page .apple-header-sidebar-button,
 .apple-home-header.group-page .apple-header-back-button {
@@ -82,11 +66,11 @@ export const viewStyles = `
 .apple-home-header.rtl .apple-header-sidebar-button,
 .apple-home-header.rtl .apple-header-back-button {
   left: auto !important;
-  right: 47px !important;
+  right: 25px !important;
 }
 .apple-home-header.rtl .apple-header-menu-button {
   right: auto !important;
-  left: 47px !important;
+  left: 25px !important;
 }
 .apple-home-header.group-page.rtl .apple-header-sidebar-button,
 .apple-home-header.group-page.rtl .apple-header-back-button {
@@ -96,30 +80,6 @@ export const viewStyles = `
 .apple-home-header.group-page.rtl .apple-header-menu-button {
   right: auto !important;
   left: var(--apple-page-padding, 22px) !important;
-}
-@media (max-width: 768px) {
-  .apple-home-header .apple-header-sidebar-button,
-  .apple-home-header .apple-header-back-button { left: 41px !important; }
-  .apple-home-header .apple-header-menu-button { right: 41px !important; }
-  .apple-home-header.rtl .apple-header-sidebar-button,
-  .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 41px !important; }
-  .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 41px !important; }
-}
-@media (max-width: 479px) {
-  .apple-home-header .apple-header-sidebar-button,
-  .apple-home-header .apple-header-back-button { left: 37px !important; }
-  .apple-home-header .apple-header-menu-button { right: 37px !important; }
-  .apple-home-header.rtl .apple-header-sidebar-button,
-  .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 37px !important; }
-  .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 37px !important; }
-}
-@media (max-width: 359px) {
-  .apple-home-header .apple-header-sidebar-button,
-  .apple-home-header .apple-header-back-button { left: 35px !important; }
-  .apple-home-header .apple-header-menu-button { right: 35px !important; }
-  .apple-home-header.rtl .apple-header-sidebar-button,
-  .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 35px !important; }
-  .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 35px !important; }
 }
 
 .apple-page-title {
