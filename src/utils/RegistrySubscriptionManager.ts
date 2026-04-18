@@ -21,6 +21,7 @@ export class RegistrySubscriptionManager {
   private static instance: RegistrySubscriptionManager | null = null;
   
   private hass: any = null;
+  private lastConnection: any = null;
   private entityRegistryUnsubscribe: (() => void) | null = null;
   private deviceRegistryUnsubscribe: (() => void) | null = null;
   private areaRegistryUnsubscribe: (() => void) | null = null;
@@ -54,11 +55,11 @@ export class RegistrySubscriptionManager {
    * Set the Home Assistant instance and initialize subscriptions
    */
   setHass(hass: any): void {
-    const hassChanged = this.hass !== hass;
     this.hass = hass;
-    
-    // Re-subscribe if hass instance changed
-    if (hassChanged && hass?.connection) {
+
+    const connection = hass?.connection;
+    if (connection && connection !== this.lastConnection) {
+      this.lastConnection = connection;
       this.subscribe();
     }
   }

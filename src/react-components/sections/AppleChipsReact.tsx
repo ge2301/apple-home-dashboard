@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useHass, useCustomizationManager, useConfig } from '../../contexts/HassContext';
+import { useHassRef, useHassVersion, useCustomizationManager, useConfig } from '../../contexts/HassContext';
 import { AppleChips } from '../../sections/AppleChips';
 import { ChipsConfigurationManager } from '../../utils/ChipsConfigurationManager';
 import { DeviceGroup } from '../../config/DashboardConfig';
@@ -8,12 +8,9 @@ interface AppleChipsReactProps {
   activeGroup?: DeviceGroup;
 }
 
-/**
- * Bridge component: mounts the existing imperative AppleChips into a React ref.
- * Full React rewrite will follow in a later phase.
- */
 export function AppleChipsReact({ activeGroup }: AppleChipsReactProps) {
-  const hass = useHass();
+  const hassRef = useHassRef();
+  const hassVersion = useHassVersion();
   const customizationManager = useCustomizationManager();
   const config = useConfig();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,8 +25,13 @@ export function AppleChipsReact({ activeGroup }: AppleChipsReactProps) {
 
     const chipsSettings = ChipsConfigurationManager.getSettingsFromConfig(config);
     chipsRef.current.setConfig(chipsSettings.chips_config);
-    chipsRef.current.hass = hass;
-  }, [hass, customizationManager, config]);
+  }, [customizationManager, config]);
+
+  useEffect(() => {
+    if (chipsRef.current && hassRef.current) {
+      chipsRef.current.hass = hassRef.current;
+    }
+  }, [hassVersion]);
 
   useEffect(() => {
     if (chipsRef.current) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { useHass, useCustomizationManager, useEditMode } from '../../contexts/HassContext';
+import { useHassRef, useHassVersion, useCustomizationManager, useEditMode } from '../../contexts/HassContext';
 import { RoomPage } from '../../pages/RoomPage';
 import { DragAndDropManager } from '../../utils/DragAndDropManager';
 import { sectionVariants } from '../animations';
@@ -11,23 +11,31 @@ interface RoomPageReactProps {
 }
 
 export function RoomPageReact({ areaId, areaName }: RoomPageReactProps) {
-  const hass = useHass();
+  const hassRef = useHassRef();
+  const hassVersion = useHassVersion();
   const customizationManager = useCustomizationManager();
   const { editMode } = useEditMode();
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<RoomPage | null>(null);
   const dndRef = useRef<DragAndDropManager | null>(null);
+  const renderedKeyRef = useRef<string>('');
 
   useEffect(() => {
-    if (!containerRef.current || !hass) return;
+    if (!containerRef.current || !hassRef.current) return;
+    const hass = hassRef.current;
+
+    const renderKey = `${areaId}|${areaName}`;
+    if (renderKey === renderedKeyRef.current && containerRef.current.childElementCount > 0) {
+      return;
+    }
+    renderedKeyRef.current = renderKey;
 
     if (!pageRef.current) {
       pageRef.current = new RoomPage();
     }
-
     if (!dndRef.current) {
       dndRef.current = new DragAndDropManager(
-        () => customizationManager?.saveLayoutToStorage?.(hass),
+        () => customizationManager?.saveLayoutToStorage?.(hassRef.current),
         customizationManager,
         'room'
       );
@@ -42,7 +50,14 @@ export function RoomPageReact({ areaId, areaName }: RoomPageReactProps) {
 
     containerRef.current.innerHTML = '';
     page.render(containerRef.current, areaId, areaName, hass, () => {});
-  }, [hass, areaId, areaName, customizationManager]);
+  }, [areaId, areaName, customizationManager]);
+
+  useEffect(() => {
+    if (!containerRef.current || !hassRef.current) return;
+    const hass = hassRef.current;
+    const cards = containerRef.current.querySelectorAll('apple-home-card');
+    cards.forEach((card: any) => { card.hass = hass; });
+  }, [hassVersion]);
 
   useEffect(() => {
     if (!containerRef.current || !dndRef.current) return;

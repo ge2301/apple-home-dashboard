@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
-import { useHass, useConfig, useCustomizationManager } from '../contexts/HassContext';
+import { useHassRef, useConfig, useCustomizationManager } from '../contexts/HassContext';
 import { AppleHeaderReact } from './sections/AppleHeaderReact';
 import { AppleChipsReact } from './sections/AppleChipsReact';
 import { HomePageReact } from './pages/HomePageReact';
@@ -13,9 +13,8 @@ import { DeviceGroup } from '../config/DashboardConfig';
 import { pageVariants } from './animations';
 
 export function AppShell() {
-  const hass = useHass();
+  const hassRef = useHassRef();
   const config = useConfig();
-  const customizationManager = useCustomizationManager();
   const isRTL = RTLHelper.isRTL();
 
   const pageType = config.pageType || 'home';
@@ -50,11 +49,11 @@ export function AppShell() {
         return (
           <HomePageReact
             key={pageKey}
-            title={config.title || hass?.config?.location_name || 'My Home'}
+            title={config.title || hassRef.current?.config?.location_name || 'My Home'}
           />
         );
     }
-  }, [pageType, pageKey, config, hass]);
+  }, [pageType, pageKey, config]);
 
   return (
     <div className={`wrapper-content ${isRTL ? 'rtl' : 'ltr'}`}>

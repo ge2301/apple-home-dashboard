@@ -1,6 +1,6 @@
 import React from 'react';
 import { ReactBridge } from '../bridge/ReactBridge';
-import { HassProvider, ViewConfig } from '../contexts/HassContext';
+import { HassProvider, ViewConfig, useBumpHass } from '../contexts/HassContext';
 import { AppShell } from '../react-components/AppShell';
 import { viewStyles } from '../react-components/ViewStyles';
 import { CustomizationManager } from '../utils/CustomizationManager';
@@ -21,6 +21,10 @@ export class AppleHomeView extends HTMLElement {
 
   private reactBridge?: ReactBridge;
   private customizationManager: CustomizationManager;
+  private _viewConfig?: ViewConfig;
+  private _setEditMode: (mode: boolean) => void;
+  private _bumpHass?: (hass: any) => void;
+  private _hassUpdateTimer?: ReturnType<typeof setTimeout>;
 
   private registrySubscriptionManager?: RegistrySubscriptionManager;
   private registryChangeHandler?: RegistryChangeCallback;
@@ -51,12 +55,18 @@ export class AppleHomeView extends HTMLElement {
     super();
     this.currentDashboardKey = this.getDashboardKey();
     this.customizationManager = CustomizationManager.getInstance();
+    this._setEditMode = (mode: boolean) => {
+      this._editMode = mode;
+      this.classList.toggle('edit-mode', mode);
+      this.renderReact();
+    };
   }
 
   connectedCallback() {
     this.visibilityChangeHandler = () => {
-      // Re-render when visibility changes (cameras resume etc.)
-      if (!document.hidden) this.renderReact();
+      if (!document.hidden && this._hass) {
+        this.pushHassUpdate();
+      }
     };
     document.addEventListener('visibilitychange', this.visibilityChangeHandler);
 
@@ -86,6 +96,11 @@ export class AppleHomeView extends HTMLElement {
 
     if (this.getCurrentActiveInstance() === this) {
       this.setCurrentActiveInstance(undefined);
+    }
+
+    if (this._hassUpdateTimer) {
+      clearTimeout(this._hassUpdateTimer);
+      this._hassUpdateTimer = undefined;
     }
 
     if (this.reactBridge) {
@@ -131,13 +146,33 @@ export class AppleHomeView extends HTMLElement {
     }
     this._lastLanguage = currentLanguage;
 
-    const isFirstHassSet = !oldHass;
-    if (isFirstHassSet) {
+    if (!oldHass) {
       this.loadAndApplyCustomizations();
+      this.ensureShadowRoot();
+      this.renderReact();
+      return;
     }
 
     this.ensureShadowRoot();
-    this.renderReact();
+    this.scheduleHassUpdate();
+  }
+
+  /**
+   * Debounce hass-only updates: update ref + bump version inside React
+   * without calling root.render() again.
+   */
+  private scheduleHassUpdate() {
+    if (this._hassUpdateTimer) return;
+    this._hassUpdateTimer = setTimeout(() => {
+      this._hassUpdateTimer = undefined;
+      this.pushHassUpdate();
+    }, 100);
+  }
+
+  private pushHassUpdate() {
+    if (this._bumpHass && this._hass) {
+      this._bumpHass(this._hass);
+    }
   }
 
   getCardSize() {
@@ -160,37 +195,55 @@ export class AppleHomeView extends HTMLElement {
     }
   }
 
+  private buildViewConfig(): ViewConfig {
+    return {
+      title: this.config!.title,
+      pageType: this.config!.pageType,
+      deviceGroup: this.config!.deviceGroup,
+      areaId: this.config!.areaId,
+      areaName: this.config!.areaName,
+      customizations: this.config!.customizations,
+      activeGroup: this.config!.activeGroup,
+    };
+  }
+
+  private viewConfigChanged(a: ViewConfig | undefined, b: ViewConfig): boolean {
+    if (!a) return true;
+    return a.title !== b.title || a.pageType !== b.pageType ||
+      a.deviceGroup !== b.deviceGroup || a.areaId !== b.areaId ||
+      a.areaName !== b.areaName || a.activeGroup !== b.activeGroup ||
+      a.customizations !== b.customizations;
+  }
+
+  /**
+   * Full React tree mount / structural update.
+   * Only call this for config changes, editMode changes, or initial mount.
+   * hass-only updates go through pushHassUpdate() → bumpHass().
+   */
   private renderReact() {
     if (!this._hass || !this.config) return;
 
     this.ensureShadowRoot();
 
-    const viewConfig: ViewConfig = {
-      title: this.config.title,
-      pageType: this.config.pageType,
-      deviceGroup: this.config.deviceGroup,
-      areaId: this.config.areaId,
-      areaName: this.config.areaName,
-      customizations: this.config.customizations,
-      activeGroup: this.config.activeGroup,
-    };
+    const nextConfig = this.buildViewConfig();
+    if (this.viewConfigChanged(this._viewConfig, nextConfig)) {
+      this._viewConfig = nextConfig;
+    }
 
-    const setEditMode = (mode: boolean) => {
-      this._editMode = mode;
-      this.classList.toggle('edit-mode', mode);
-      this.renderReact();
-    };
-
+    const self = this;
     this.reactBridge!.render(
       React.createElement(
         HassProvider,
         {
-          hass: this._hass,
-          config: viewConfig,
+          initialHass: this._hass,
+          config: this._viewConfig!,
           customizationManager: this.customizationManager,
           editMode: this._editMode,
-          setEditMode,
-          children: React.createElement(AppShell),
+          setEditMode: this._setEditMode,
+          children: React.createElement(BumpHassCapture, {
+            onCapture: (bump: (hass: any) => void) => { self._bumpHass = bump; },
+            children: React.createElement(AppShell),
+          }),
         }
       )
     );
@@ -228,7 +281,9 @@ export class AppleHomeView extends HTMLElement {
     this.registrySubscriptionManager = RegistrySubscriptionManager.getInstance();
     this.registryChangeHandler = (event) => {
       if (this._editMode) return;
-      this.renderReact();
+      if (this._bumpHass && this._hass) {
+        this._bumpHass(this._hass);
+      }
     };
     this.registrySubscriptionManager.addListener(this.registryChangeHandler);
     if (this._hass) {
@@ -256,4 +311,14 @@ export class AppleHomeView extends HTMLElement {
     }
     this.rtlChangeHandler = undefined;
   }
+}
+
+function BumpHassCapture({ onCapture, children }: { onCapture: (bump: (hass: any) => void) => void; children: React.ReactNode }) {
+  const bump = useBumpHass();
+  const captured = React.useRef(false);
+  if (!captured.current) {
+    captured.current = true;
+    onCapture(bump);
+  }
+  return React.createElement(React.Fragment, null, children);
 }

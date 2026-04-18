@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useRef, useMemo, useState, useCallback } from 'react';
 
 export interface ViewConfig {
   title?: string;
@@ -10,45 +10,64 @@ export interface ViewConfig {
   activeGroup?: string;
 }
 
-interface HassContextValue {
-  hass: any;
+interface HassOnlyContextValue {
+  hassRef: React.MutableRefObject<any>;
+  hassVersion: number;
+  bumpHass: (hass: any) => void;
+}
+
+interface AppContextValue {
   config: ViewConfig;
   customizationManager: any;
   editMode: boolean;
   setEditMode: (mode: boolean) => void;
 }
 
-export const HassContext = createContext<HassContextValue>({
-  hass: null,
+const HassOnlyContext = createContext<HassOnlyContextValue>({
+  hassRef: { current: null },
+  hassVersion: 0,
+  bumpHass: () => {},
+});
+
+const AppContext = createContext<AppContextValue>({
   config: {},
   customizationManager: null,
   editMode: false,
   setEditMode: () => {},
 });
 
-export function useHass() {
-  const ctx = useContext(HassContext);
-  if (!ctx.hass) {
-    throw new Error('useHass must be used within a HassContext provider with a valid hass object');
-  }
-  return ctx.hass;
+export function useHass(): any {
+  return useContext(HassOnlyContext).hassRef.current;
+}
+
+export function useHassRef(): React.MutableRefObject<any> {
+  return useContext(HassOnlyContext).hassRef;
+}
+
+export function useHassVersion(): number {
+  return useContext(HassOnlyContext).hassVersion;
+}
+
+/** Imperatively push a new hass object without calling root.render() again. */
+export function useBumpHass(): (hass: any) => void {
+  return useContext(HassOnlyContext).bumpHass;
 }
 
 export function useConfig() {
-  return useContext(HassContext).config;
+  return useContext(AppContext).config;
 }
 
 export function useCustomizationManager() {
-  return useContext(HassContext).customizationManager;
+  return useContext(AppContext).customizationManager;
 }
 
 export function useEditMode() {
-  const { editMode, setEditMode } = useContext(HassContext);
+  const { editMode, setEditMode } = useContext(AppContext);
   return { editMode, setEditMode };
 }
 
 interface HassProviderProps {
-  hass: any;
+  initialHass: any;
   config: ViewConfig;
   customizationManager: any;
   editMode: boolean;
@@ -57,16 +76,40 @@ interface HassProviderProps {
 }
 
 export function HassProvider({
-  hass,
+  initialHass,
   config,
   customizationManager,
   editMode,
   setEditMode,
   children,
 }: HassProviderProps) {
-  const value = React.useMemo(
-    () => ({ hass, config, customizationManager, editMode, setEditMode }),
-    [hass, config, customizationManager, editMode, setEditMode]
+  const hassRef = useRef<any>(initialHass);
+  const [hassVersion, setHassVersion] = useState(0);
+
+  const bumpHass = useCallback((hass: any) => {
+    hassRef.current = hass;
+    setHassVersion(v => v + 1);
+  }, []);
+
+  const hassValue = useMemo(
+    () => ({ hassRef, hassVersion, bumpHass }),
+    [hassVersion, bumpHass]
   );
-  return React.createElement(HassContext.Provider, { value }, children);
+
+  const appValue = useMemo(
+    () => ({ config, customizationManager, editMode, setEditMode }),
+    [config, customizationManager, editMode, setEditMode]
+  );
+
+  return React.createElement(
+    HassOnlyContext.Provider,
+    { value: hassValue },
+    React.createElement(
+      AppContext.Provider,
+      { value: appValue },
+      children
+    )
+  );
 }
+
+export { HassOnlyContext, AppContext };

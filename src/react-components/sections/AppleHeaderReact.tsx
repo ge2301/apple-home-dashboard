@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { useHass, useConfig, useCustomizationManager, useEditMode } from '../../contexts/HassContext';
+import { useHassRef, useHassVersion, useConfig, useCustomizationManager, useEditMode } from '../../contexts/HassContext';
 import { AppleHeader, HeaderConfig } from '../../sections/AppleHeader';
 import { EditModeManager } from '../../utils/EditModeManager';
 import { localize } from '../../utils/LocalizationService';
@@ -11,20 +11,18 @@ interface AppleHeaderReactProps {
   showBackButton?: boolean;
 }
 
-/**
- * Bridge component: mounts the existing imperative AppleHeader into a React ref.
- * Full React rewrite will follow in a later phase.
- */
 export function AppleHeaderReact({ title, isGroupPage, isSpecialPage, showBackButton }: AppleHeaderReactProps) {
-  const hass = useHass();
+  const hassRef = useHassRef();
+  const hassVersion = useHassVersion();
   const config = useConfig();
   const customizationManager = useCustomizationManager();
-  const { editMode, setEditMode } = useEditMode();
+  const { setEditMode } = useEditMode();
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<AppleHeader | null>(null);
   const editManagerRef = useRef<EditModeManager | null>(null);
   const setEditModeRef = useRef(setEditMode);
   setEditModeRef.current = setEditMode;
+  const initedKeyRef = useRef<string>('');
 
   const stableSetEditMode = useCallback((mode: boolean) => {
     setEditModeRef.current(mode);
@@ -40,8 +38,6 @@ export function AppleHeaderReact({ title, isGroupPage, isSpecialPage, showBackBu
       headerRef.current.setCustomizationManager(customizationManager);
     }
 
-    headerRef.current.setHass(hass);
-
     const headerConfig: HeaderConfig = {
       title: title || localize('pages.my_home'),
       isGroupPage,
@@ -50,9 +46,20 @@ export function AppleHeaderReact({ title, isGroupPage, isSpecialPage, showBackBu
       showBackButton,
     };
 
-    headerRef.current.init(containerRef.current, headerConfig);
-    headerRef.current.updatePageContentPadding();
-  }, [hass, title, isGroupPage, isSpecialPage, showBackButton, customizationManager, stableSetEditMode]);
+    const initKey = `${title}|${isGroupPage}|${isSpecialPage}|${showBackButton}`;
+    if (initKey !== initedKeyRef.current) {
+      initedKeyRef.current = initKey;
+      headerRef.current.setHass(hassRef.current);
+      headerRef.current.init(containerRef.current, headerConfig);
+      headerRef.current.updatePageContentPadding();
+    }
+  }, [title, isGroupPage, isSpecialPage, showBackButton, customizationManager, stableSetEditMode]);
+
+  useEffect(() => {
+    if (headerRef.current && hassRef.current) {
+      headerRef.current.setHass(hassRef.current);
+    }
+  }, [hassVersion]);
 
   useEffect(() => {
     if (headerRef.current && title) {
