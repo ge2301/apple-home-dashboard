@@ -37,43 +37,43 @@ export const viewStyles = `
   position: relative;
 }
 
-/* Chip margin in group/filter view: use sibling selector because
-   has-fixed-header class is added to the header div, not .page-content. */
-.apple-home-header.group-page ~ .permanent-chips {
+/* Chip margin & content padding in group/filter view.
+   The inner header gets .group-page; the outer wrapper gets .is-group-page
+   (set by AppleHeaderReact) so sibling selectors work. */
+.is-group-page ~ .permanent-chips {
   margin-top: 16px;
 }
-
-/* Group page fixed header: push subsequent content down.
-   The has-fixed-header class never lands on .page-content (it goes onto
-   the header div), so we use :has() to target the correct parent. */
-.page-content:has(> .apple-home-header.group-page) {
+.page-content:has(> .is-group-page) {
   padding-top: 68px;
 }
 @media (max-width: 768px) {
-  .page-content:has(> .apple-home-header.group-page) {
-    padding-top: 60px;
-  }
+  .page-content:has(> .is-group-page) { padding-top: 60px; }
 }
 @media (max-width: 359px) {
-  .page-content:has(> .apple-home-header.group-page) {
-    padding-top: 50px;
-  }
+  .page-content:has(> .is-group-page) { padding-top: 50px; }
 }
 
 /* Overlay button positioning.
-   Home header (sticky): margin-left:-Xpx makes it edge-to-edge.
-     Buttons need padding+25px from header edge to sit 25px inward of cards.
+   Buttons are position:absolute inside .apple-header-content (position:relative).
+   left/right values are from .apple-header-content's padding-box edge,
+   which equals the inner .apple-home-header's left edge.
+
+   Home header (sticky): negative margin shifts header left of :host content.
+     header_left = host_padding - |header_margin|.
+     To place buttons 25px inward of cards (cards_left = host_padding):
+       button_left = |header_margin| + 25px.
    Group header (fixed, JS-positioned to panel edge):
-     Buttons need only host-padding from header edge to align with cards.
-   No per-breakpoint overrides needed: the value is the same since
-   host padding (22px) stays constant and the header's own .apple-header-content
-   padding tracks its negative margin automatically. */
+     header_left = panel_left. Cards at panel_left + host_padding.
+       button_left = host_padding (flush with cards, no extra inset).
+
+   Desktop: header_margin = 22px → 47px.
+   Per-breakpoint overrides correct for smaller margins on mobile. */
 .apple-home-header .apple-header-sidebar-button,
 .apple-home-header .apple-header-back-button {
-  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+  left: 47px !important;
 }
 .apple-home-header .apple-header-menu-button {
-  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+  right: 47px !important;
 }
 .apple-home-header.group-page .apple-header-sidebar-button,
 .apple-home-header.group-page .apple-header-back-button {
@@ -85,11 +85,11 @@ export const viewStyles = `
 .apple-home-header.rtl .apple-header-sidebar-button,
 .apple-home-header.rtl .apple-header-back-button {
   left: auto !important;
-  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+  right: 47px !important;
 }
 .apple-home-header.rtl .apple-header-menu-button {
   right: auto !important;
-  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+  left: 47px !important;
 }
 .apple-home-header.group-page.rtl .apple-header-sidebar-button,
 .apple-home-header.group-page.rtl .apple-header-back-button {
@@ -99,6 +99,30 @@ export const viewStyles = `
 .apple-home-header.group-page.rtl .apple-header-menu-button {
   right: auto !important;
   left: var(--apple-page-padding, 22px) !important;
+}
+@media (max-width: 768px) {
+  .apple-home-header .apple-header-sidebar-button,
+  .apple-home-header .apple-header-back-button { left: 41px !important; }
+  .apple-home-header .apple-header-menu-button { right: 41px !important; }
+  .apple-home-header.rtl .apple-header-sidebar-button,
+  .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 41px !important; }
+  .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 41px !important; }
+}
+@media (max-width: 479px) {
+  .apple-home-header .apple-header-sidebar-button,
+  .apple-home-header .apple-header-back-button { left: 37px !important; }
+  .apple-home-header .apple-header-menu-button { right: 37px !important; }
+  .apple-home-header.rtl .apple-header-sidebar-button,
+  .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 37px !important; }
+  .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 37px !important; }
+}
+@media (max-width: 359px) {
+  .apple-home-header .apple-header-sidebar-button,
+  .apple-home-header .apple-header-back-button { left: 35px !important; }
+  .apple-home-header .apple-header-menu-button { right: 35px !important; }
+  .apple-home-header.rtl .apple-header-sidebar-button,
+  .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 35px !important; }
+  .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 35px !important; }
 }
 
 .apple-page-title {
