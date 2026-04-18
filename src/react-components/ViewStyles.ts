@@ -41,26 +41,60 @@ export const viewStyles = `
   margin-top: 8px;
 }
 
-/* Align overlay buttons so they sit flush with the content grid.
-   Both home (sticky) and group (fixed) headers span edge-to-edge,
-   so they need the same inset value. Mobile keeps the original
-   12px from AppleHeader.ts. */
-@media (min-width: 769px) {
+/* Align overlay buttons flush with the content grid.
+   Home header: sticky with margin-left:-22px (edge-to-edge via CSS).
+     Buttons need page-padding + extra to align with cards.
+   Group header: position:fixed, left set by JS to panel edge.
+     Buttons only need page-padding since header already starts at panel edge.
+   Mobile: slightly smaller inset to avoid clipping. */
+.apple-home-header .apple-header-sidebar-button,
+.apple-home-header .apple-header-back-button {
+  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+}
+.apple-home-header .apple-header-menu-button {
+  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+}
+.apple-home-header.group-page .apple-header-sidebar-button,
+.apple-home-header.group-page .apple-header-back-button {
+  left: var(--apple-page-padding, 22px) !important;
+}
+.apple-home-header.group-page .apple-header-menu-button {
+  right: var(--apple-page-padding, 22px) !important;
+}
+.apple-home-header.rtl .apple-header-sidebar-button,
+.apple-home-header.rtl .apple-header-back-button {
+  left: auto !important;
+  right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+}
+.apple-home-header.rtl .apple-header-menu-button {
+  right: auto !important;
+  left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+}
+.apple-home-header.group-page.rtl .apple-header-sidebar-button,
+.apple-home-header.group-page.rtl .apple-header-back-button {
+  left: auto !important;
+  right: var(--apple-page-padding, 22px) !important;
+}
+.apple-home-header.group-page.rtl .apple-header-menu-button {
+  right: auto !important;
+  left: var(--apple-page-padding, 22px) !important;
+}
+@media (max-width: 768px) {
   .apple-home-header .apple-header-sidebar-button,
   .apple-home-header .apple-header-back-button {
-    left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+    left: calc(var(--apple-page-padding, 22px) + 6px) !important;
   }
   .apple-home-header .apple-header-menu-button {
-    right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+    right: calc(var(--apple-page-padding, 22px) + 6px) !important;
   }
   .apple-home-header.rtl .apple-header-sidebar-button,
   .apple-home-header.rtl .apple-header-back-button {
     left: auto !important;
-    right: calc(var(--apple-page-padding, 22px) + 25px) !important;
+    right: calc(var(--apple-page-padding, 22px) + 6px) !important;
   }
   .apple-home-header.rtl .apple-header-menu-button {
     right: auto !important;
-    left: calc(var(--apple-page-padding, 22px) + 25px) !important;
+    left: calc(var(--apple-page-padding, 22px) + 6px) !important;
   }
 }
 
