@@ -110,7 +110,10 @@ export class AppleHomeView extends HTMLElement {
   }
 
   async setConfig(config: any) {
-    const oldConfig = this._config;
+    if (this._config && JSON.stringify(this._config) === JSON.stringify(config)) {
+      return;
+    }
+
     this._rendered = false;
     this.config = config;
 
@@ -253,10 +256,16 @@ export class AppleHomeView extends HTMLElement {
 
   // --- Customization & registry management (preserved from original) ---
 
+  private _lastCustomizationsJSON?: string;
+
   private async loadAndApplyCustomizations() {
     if (!this._hass) return;
     try {
       const customizations = await this.customizationManager.loadCustomizations();
+      const json = JSON.stringify(customizations);
+      if (json === this._lastCustomizationsJSON) return;
+      this._lastCustomizationsJSON = json;
+
       await this.customizationManager.setCustomizations(customizations);
       if (this.config) {
         this.config = { ...this.config, customizations };
@@ -269,6 +278,10 @@ export class AppleHomeView extends HTMLElement {
 
   private async handleGlobalRefresh(customizations: any) {
     try {
+      const json = JSON.stringify(customizations);
+      if (json === this._lastCustomizationsJSON) return;
+      this._lastCustomizationsJSON = json;
+
       await this.customizationManager.setCustomizations(customizations);
       this.config = { ...this.config, customizations };
       this.renderReact();

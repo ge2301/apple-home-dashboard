@@ -204,14 +204,15 @@ export class BackgroundManager {
       body::after {
         content: "";
         position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 100vw;
+        top: -20px;
+        left: -20px;
+        height: calc(100vh + 40px);
+        width: calc(100vw + 40px);
         z-index: -1;
         background: ${backgroundStyle} center center;
         background-size: cover;
         background-repeat: no-repeat;
+        filter: blur(20px);
       }
     `;
     
