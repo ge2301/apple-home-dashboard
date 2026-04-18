@@ -131,7 +131,7 @@ export class AppleChips {
       },
       water: {
         group: DeviceGroup.WATER,
-        enabled: false,
+        enabled: true,
         show_when_zero: false
       },
       energy: {
@@ -179,7 +179,7 @@ export class AppleChips {
     }
   }
 
-  private static readonly RELEVANT_DOMAINS = new Set(['light', 'switch', 'climate', 'alarm_control_panel', 'lock', 'media_player', 'water_heater']);
+  private static readonly RELEVANT_DOMAINS = new Set(['light', 'switch', 'climate', 'alarm_control_panel', 'lock', 'media_player', 'water_heater', 'valve']);
   private static readonly WATER_KEYWORDS = ['water', 'leak', 'flood'];
 
   private hasRelevantEntityChanges(newHass: any): boolean {
@@ -382,9 +382,9 @@ export class AppleChips {
         }
       });
 
-      // Special handling for water group since it's not in the domain mapping
       if (group === DeviceGroup.WATER) {
         const waterEntities = allEntities.filter(entity =>
+          entity.entity_id.startsWith('valve.') ||
           entity.entity_id.includes('water') ||
           entity.entity_id.includes('leak') ||
           entity.entity_id.includes('flood') ||
@@ -906,7 +906,7 @@ export class AppleChips {
         break;
         
       case DeviceGroup.WATER:
-        const activeWater = entities.filter(entity => entity.state === 'on' || entity.state === 'detected');
+        const activeWater = entities.filter(entity => entity.state === 'on' || entity.state === 'open' || entity.state === 'opening' || entity.state === 'detected');
         statusText = activeWater.length > 0 ? `${activeWater.length} ${localize('chip_status.active')}` : localize('status.off');
         break;
 
