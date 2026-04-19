@@ -23,6 +23,8 @@ import { injectLiquidGlassStyles } from './utils/LiquidGlassStyles';
 // Inject liquid glass styles early at module load time
 injectLiquidGlassStyles();
 
+console.info('%c APPLE HOME DASHBOARD v2.3.0-other ', 'background:#8e8e93;color:#fff;font-weight:bold;border-radius:4px;padding:2px 6px');
+
 // Extend window interface for TypeScript
 declare global {
   interface Window {
