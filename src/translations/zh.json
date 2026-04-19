@@ -73,7 +73,8 @@
     "media": "音响和电视",
     "vacuum": "吸尘器",
     "energy": "能源",
-    "other": "其他"
+    "other": "其他",
+    "shading": "遮阳"
   },
   "chip_status": {
     "secure": "安全",

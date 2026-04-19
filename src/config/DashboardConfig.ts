@@ -5,7 +5,7 @@
     'switch': DeviceGroup.OTHER, // Outlets and switches
     'climate': DeviceGroup.CLIMATE,
     'fan': DeviceGroup.CLIMATE,
-    'cover': DeviceGroup.CLIMATE, // Default - garage doors go to security
+    'cover': DeviceGroup.SHADING, // Default - garage doors go to security
     'lock': DeviceGroup.SECURITY,
     'alarm_control_panel': DeviceGroup.SECURITY,
     'media_player': DeviceGroup.MEDIA,
@@ -26,6 +26,7 @@ export enum DeviceGroup {
   LIGHTING = 'lighting',
   CLIMATE = 'climate', 
   SECURITY = 'security',
+  SHADING = 'shading',
   WATER = 'water',
   MEDIA = 'media',
   VACUUM = 'vacuum',
@@ -80,14 +81,19 @@ export class DashboardConfig {
       name: () => localize('groups.lights')
     },
     [DeviceGroup.CLIMATE]: {
-      iconColor: '#00c0e8', // Blue for climate/fans/covers
-      icon: 'mdi:fan',
+      iconColor: '#FF9500', // Orange for climate/thermostats
+      icon: 'mdi:thermostat',
       name: () => localize('groups.climate')
     },
     [DeviceGroup.SECURITY]: {
       iconColor: '#00cbbf', // Teal for security devices
       icon: 'mdi:lock',
       name: () => localize('groups.security')
+    },
+    [DeviceGroup.SHADING]: {
+      iconColor: '#00c0e8', // Blue for blinds/shutters (former climate color)
+      icon: 'mdi:window-shutter',
+      name: () => localize('groups.shading')
     },
     [DeviceGroup.WATER]: {
       iconColor: '#0b78f6', // Dark blue for water devices
@@ -125,7 +131,7 @@ export class DashboardConfig {
     'switch': DeviceGroup.OTHER, // Outlets and switches
     'climate': DeviceGroup.CLIMATE,
     'fan': DeviceGroup.CLIMATE,
-    'cover': DeviceGroup.CLIMATE, // Default - garage doors go to security
+    'cover': DeviceGroup.SHADING, // Default - garage doors go to security
     'lock': DeviceGroup.SECURITY,
     'alarm_control_panel': DeviceGroup.SECURITY,
     'media_player': DeviceGroup.MEDIA,

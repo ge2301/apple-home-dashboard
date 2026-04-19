@@ -74,7 +74,8 @@
     "media": "Altavoces y TVs",
     "vacuum": "Aspiradoras",
     "energy": "Energía",
-    "other": "Otros"
+    "other": "Otros",
+    "shading": "Persianas"
   },
   "chip_status": {
     "secure": "Seguro",

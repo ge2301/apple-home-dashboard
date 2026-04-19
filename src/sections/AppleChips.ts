@@ -15,6 +15,7 @@ export interface ChipsConfig {
   climate?: ChipConfig;
   lights?: ChipConfig;
   security?: ChipConfig;
+  shading?: ChipConfig;
   media?: ChipConfig;
   water?: ChipConfig;
   energy?: ChipConfig;
@@ -129,6 +130,11 @@ export class AppleChips {
         group: DeviceGroup.MEDIA,
         enabled: true,
         show_when_zero: true
+      },
+      shading: {
+        group: DeviceGroup.SHADING,
+        enabled: true,
+        show_when_zero: false
       },
       water: {
         group: DeviceGroup.WATER,
@@ -354,6 +360,7 @@ export class AppleChips {
       { group: DeviceGroup.CLIMATE, config: this.config.climate },
       { group: DeviceGroup.LIGHTING, config: this.config.lights },
       { group: DeviceGroup.SECURITY, config: this.config.security },
+      { group: DeviceGroup.SHADING, config: this.config.shading },
       { group: DeviceGroup.MEDIA, config: this.config.media },
       { group: DeviceGroup.WATER, config: this.config.water },
       { group: DeviceGroup.ENERGY, config: this.config.energy },
@@ -922,6 +929,17 @@ export class AppleChips {
           statusText = totalPower >= 1000 ? `${(totalPower / 1000).toFixed(1)} kW` : `${Math.round(totalPower)} W`;
         } else {
           statusText = localize('energy.active');
+        }
+        break;
+
+      case DeviceGroup.SHADING:
+        const openCovers = entities.filter(entity => entity.state === 'open' || entity.state === 'opening');
+        if (openCovers.length === 0) {
+          statusText = localize('covers.all_closed');
+        } else if (openCovers.length === entities.length) {
+          statusText = localize('covers.all_open');
+        } else {
+          statusText = `${openCovers.length} ${localize('covers.open')}`;
         }
         break;
 

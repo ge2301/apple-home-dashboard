@@ -73,7 +73,8 @@
     "media": "Speakers & TV's",
     "vacuum": "Stofzuigers",
     "energy": "Energie",
-    "other": "Overige"
+    "other": "Overige",
+    "shading": "Zonwering"
   },
   "chip_status": {
     "secure": "Beveiligd",

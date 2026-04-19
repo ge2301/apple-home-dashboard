@@ -73,7 +73,8 @@
     "media": "רמקולים וטלוויזיות",
     "vacuum": "שואבי אבק",
     "energy": "אנרגיה",
-    "other": "אחר"
+    "other": "אחר",
+    "shading": "הצללה"
   },
   "chip_status": {
     "secure": "מאובטח",

@@ -73,7 +73,8 @@
     "media": "Haut-parleurs et TVs",
     "vacuum": "Aspirateurs",
     "energy": "Énergie",
-    "other": "Autres"
+    "other": "Autres",
+    "shading": "Stores"
   },
   "chip_status": {
     "secure": "Sécurisé",

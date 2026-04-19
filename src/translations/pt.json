@@ -73,7 +73,8 @@
     "media": "Alto-falantes e TVs",
     "vacuum": "Aspiradores",
     "energy": "Energia",
-    "other": "Outros"
+    "other": "Outros",
+    "shading": "Estores"
   },
   "chip_status": {
     "secure": "Seguro",

@@ -202,6 +202,7 @@ export class RoomPage {
         DeviceGroup.LIGHTING,
         DeviceGroup.CLIMATE, 
         DeviceGroup.SECURITY,
+        DeviceGroup.SHADING,
         DeviceGroup.MEDIA,
         DeviceGroup.WATER,
         DeviceGroup.OTHER

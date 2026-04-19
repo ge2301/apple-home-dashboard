@@ -31,6 +31,11 @@ export class ChipsConfigurationManager {
         enabled: true,
         show_when_zero: false,
       },
+      shading: {
+        group: DeviceGroup.SHADING,
+        enabled: true,
+        show_when_zero: false
+      },
       water: {
         group: DeviceGroup.WATER,
         enabled: true,
@@ -99,7 +104,7 @@ export class ChipsConfigurationManager {
     }
 
     // Validate each chip config
-    const validChipKeys = ['climate', 'lights', 'security', 'media', 'water', 'energy', 'other'];
+    const validChipKeys = ['climate', 'lights', 'security', 'shading', 'media', 'water', 'energy', 'other'];
     const chipKeys = Object.keys(settings.chips_config);
     
     for (const key of chipKeys) {

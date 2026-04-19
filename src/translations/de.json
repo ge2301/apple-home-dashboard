@@ -73,7 +73,8 @@
     "media": "Lautsprecher & TVs",
     "vacuum": "Staubsauger",
     "energy": "Energie",
-    "other": "Sonstiges"
+    "other": "Sonstiges",
+    "shading": "Beschattung"
   },
   "chip_status": {
     "secure": "Sicher",
