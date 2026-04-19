@@ -30,8 +30,8 @@ export const designTokensCSS = `
       --apple-card-height: 70px;
       
       /* Card Icon - the circle with icon inside entity cards */
-      --apple-card-icon-size: 50px;
-      --apple-card-icon-font-size: 30px;
+      --apple-card-icon-size: 40px;
+      --apple-card-icon-font-size: 24px;
       
       /* Camera Height - responsive, changes via media queries */
       --apple-camera-height: 220px;
@@ -111,8 +111,8 @@ export const designTokensCSS = `
         --apple-camera-height: 200px;
         
         /* Card Icon - Mobile */
-        --apple-card-icon-size: 52px;
-        --apple-card-icon-font-size: 35px;
+        --apple-card-icon-size: 42px;
+        --apple-card-icon-font-size: 28px;
         
         /* Typography - Mobile */
         --apple-title-size: 32px;
