@@ -743,9 +743,9 @@ export class AppleHomeCard extends HTMLElement {
       }
       
       .info-icon {
-        width: var(--apple-card-icon-size, 50px);
-        height: var(--apple-card-icon-size, 50px);
-        min-width: var(--apple-card-icon-size, 50px);
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
         color: var(--card-icon-color);
         background: var(--card-icon-bg);
         transition: color 0.2s ease, background-color 0.2s ease;
@@ -762,7 +762,7 @@ export class AppleHomeCard extends HTMLElement {
         display: flex;
         align-items: center;
         justify-content: center;
-        --mdc-icon-size: var(--apple-card-icon-font-size, 30px);
+        --mdc-icon-size: 30px;
       }
       
       /* Scene/Script icon - no circle background */
@@ -1040,7 +1040,15 @@ export class AppleHomeCard extends HTMLElement {
       }
 
       /* Mobile adjustments for card layout */
-      @media (max-width: 768px) { 
+      @media (max-width: 767px) {
+        .info-icon {
+          width: 53px;
+          height: 53px;
+          min-width: 53px;
+        }
+        .info-icon ha-icon {
+          --mdc-icon-size: 35px;
+        }
         :host(.regular-design) .card-info {
             gap: var(--apple-card-gap, 10px) !important;
         }
