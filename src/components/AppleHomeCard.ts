@@ -743,9 +743,9 @@ export class AppleHomeCard extends HTMLElement {
       }
       
       .info-icon {
-        width: var(--apple-card-icon-size, 38px);
-        height: var(--apple-card-icon-size, 38px);
-        min-width: var(--apple-card-icon-size, 38px);
+        width: var(--apple-card-icon-size, 48px);
+        height: var(--apple-card-icon-size, 48px);
+        min-width: var(--apple-card-icon-size, 48px);
         color: var(--card-icon-color);
         background: var(--card-icon-bg);
         transition: color 0.2s ease, background-color 0.2s ease;
@@ -762,7 +762,7 @@ export class AppleHomeCard extends HTMLElement {
         display: flex;
         align-items: center;
         justify-content: center;
-        --mdc-icon-size: var(--apple-card-icon-font-size, 20px);
+        --mdc-icon-size: var(--apple-card-icon-font-size, 25px);
       }
       
       /* Scene/Script icon - no circle background */
