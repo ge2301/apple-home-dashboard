@@ -82,7 +82,7 @@ export class DashboardConfig {
     },
     [DeviceGroup.CLIMATE]: {
       iconColor: '#FF9500', // Orange for climate/thermostats
-      icon: 'mdi:thermostat',
+      icon: 'mdi:thermometer',
       name: () => localize('groups.climate')
     },
     [DeviceGroup.SECURITY]: {
