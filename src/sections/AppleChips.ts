@@ -18,6 +18,7 @@ export interface ChipsConfig {
   media?: ChipConfig;
   water?: ChipConfig;
   energy?: ChipConfig;
+  other?: ChipConfig;
 }
 
 export interface ChipData {
@@ -136,6 +137,11 @@ export class AppleChips {
       },
       energy: {
         group: DeviceGroup.ENERGY,
+        enabled: true,
+        show_when_zero: false
+      },
+      other: {
+        group: DeviceGroup.OTHER,
         enabled: true,
         show_when_zero: false
       }
@@ -350,7 +356,8 @@ export class AppleChips {
       { group: DeviceGroup.SECURITY, config: this.config.security },
       { group: DeviceGroup.MEDIA, config: this.config.media },
       { group: DeviceGroup.WATER, config: this.config.water },
-      { group: DeviceGroup.ENERGY, config: this.config.energy }
+      { group: DeviceGroup.ENERGY, config: this.config.energy },
+      { group: DeviceGroup.OTHER, config: this.config.other }
     ];
 
     for (const { group, config } of deviceGroups) {
@@ -916,6 +923,11 @@ export class AppleChips {
         } else {
           statusText = localize('energy.active');
         }
+        break;
+
+      case DeviceGroup.OTHER:
+        const onOther = entities.filter(entity => entity.state === 'on');
+        statusText = onOther.length > 0 ? `${onOther.length} ${localize('status.on')}` : localize('status.off');
         break;
 
       default:

@@ -111,7 +111,7 @@ export class DashboardConfig {
       name: () => localize('groups.energy')
     },
     [DeviceGroup.OTHER]: {
-      iconColor: '#ffcc0f', // Yellow for switches/outlets (same as lights)
+      iconColor: '#8e8e93', // Grey for switches/outlets and unclassified devices
       icon: 'mdi:light-switch',
       name: () => localize('groups.other')
     }

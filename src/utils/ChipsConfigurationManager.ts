@@ -35,6 +35,11 @@ export class ChipsConfigurationManager {
         group: DeviceGroup.WATER,
         enabled: true,
         show_when_zero: false
+      },
+      other: {
+        group: DeviceGroup.OTHER,
+        enabled: true,
+        show_when_zero: false
       }
     }
   };
@@ -94,7 +99,7 @@ export class ChipsConfigurationManager {
     }
 
     // Validate each chip config
-    const validChipKeys = ['climate', 'lights', 'security', 'media', 'water'];
+    const validChipKeys = ['climate', 'lights', 'security', 'media', 'water', 'energy', 'other'];
     const chipKeys = Object.keys(settings.chips_config);
     
     for (const key of chipKeys) {
