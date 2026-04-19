@@ -52,29 +52,6 @@ export function AppleHeaderReact({ title, isGroupPage, isSpecialPage, showBackBu
       headerRef.current.setHass(hassRef.current);
       headerRef.current.init(containerRef.current, headerConfig);
       headerRef.current.updatePageContentPadding();
-
-      setTimeout(() => {
-        const root = containerRef.current?.getRootNode() as ShadowRoot | Document;
-        const btn = root?.querySelector?.('.apple-header-sidebar-button, .apple-header-back-button') as HTMLElement;
-        if (btn) {
-          const cs = getComputedStyle(btn);
-          const parent = btn.parentElement;
-          const header = parent?.parentElement;
-          console.log('[BTN-DEBUG]', {
-            left: cs.left, right: cs.right, position: cs.position,
-            parentClass: parent?.className,
-            parentPaddingLeft: parent ? getComputedStyle(parent).paddingLeft : 'n/a',
-            parentPosition: parent ? getComputedStyle(parent).position : 'n/a',
-            headerClass: header?.className,
-            headerMarginLeft: header ? getComputedStyle(header).marginLeft : 'n/a',
-            headerWidth: header ? getComputedStyle(header).width : 'n/a',
-            isGroupPage,
-            styleSheetCount: (root as ShadowRoot).styleSheets?.length,
-          });
-        } else {
-          console.log('[BTN-DEBUG] no button found');
-        }
-      }, 500);
     }
   }, [title, isGroupPage, isSpecialPage, showBackButton, customizationManager, stableSetEditMode]);
 
