@@ -810,12 +810,14 @@ export class DashboardConfig {
   private static getMediaPlayerStateText(entityState: string, attributes?: any): string {
     switch (entityState) {
       case 'playing':
-        return localize('status.playing');
-      case 'paused':
-        if (!attributes?.media_title) {
-          return localize('status.off');
+      case 'paused': {
+        const title = attributes?.media_title;
+        if (!title) {
+          return entityState === 'paused' ? localize('status.off') : localize('status.playing');
         }
-        return localize('status.paused');
+        const artist = attributes?.media_artist;
+        return artist ? `${title} – ${artist}` : title;
+      }
       case 'buffering':
         return localize('status.buffering');
       case 'idle':

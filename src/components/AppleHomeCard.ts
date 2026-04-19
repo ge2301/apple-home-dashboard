@@ -316,6 +316,8 @@ export class AppleHomeCard extends HTMLElement {
     this.updateCSSVariables(entityData);
     this._hasRendered = true;
 
+    this.applyMarqueeIfNeeded();
+
     // Add click handlers only if not in edit mode
     if (!isEditMode) {
       this.setupClickHandlers();
@@ -373,6 +375,27 @@ export class AppleHomeCard extends HTMLElement {
         entityData.isActive ? 'rgba(29, 29, 31, 0.6)' : 'rgba(255, 255, 255, 0.6)');
   }
 
+  private applyMarqueeIfNeeded() {
+    if (this.domain !== 'media_player') return;
+    const stateEl = this.shadowRoot?.querySelector('.entity-state') as HTMLElement;
+    if (!stateEl) return;
+
+    const text = stateEl.textContent || '';
+    stateEl.classList.remove('marquee');
+    stateEl.innerHTML = text;
+
+    requestAnimationFrame(() => {
+      if (stateEl.scrollWidth > stateEl.clientWidth) {
+        const doubled = `${text}\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0${text}\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0`;
+        const charCount = text.length;
+        const duration = Math.max(6, charCount * 0.3);
+        stateEl.style.setProperty('--marquee-duration', `${duration}s`);
+        stateEl.classList.add('marquee');
+        stateEl.innerHTML = `<span class="marquee-inner">${doubled}</span>`;
+      }
+    });
+  }
+
   private updateCardInPlace() {
     if (!this._hass || !this.entity || !this.shadowRoot) return;
 
@@ -397,6 +420,7 @@ export class AppleHomeCard extends HTMLElement {
     const stateEl = this.shadowRoot.querySelector('.entity-state');
     if (stateEl) {
       stateEl.textContent = entityData.stateText;
+      this.applyMarqueeIfNeeded();
     }
 
     // Update temperature for climate/water_heater entities
@@ -855,6 +879,28 @@ export class AppleHomeCard extends HTMLElement {
         overflow: hidden;
         text-overflow: ellipsis;
         font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+      }
+
+      .entity-state.marquee {
+        text-overflow: clip;
+        position: relative;
+      }
+
+      .entity-state.marquee .marquee-inner {
+        display: inline-block;
+        padding-right: 2em;
+        animation: marquee-scroll var(--marquee-duration, 10s) linear infinite;
+      }
+
+      @keyframes marquee-scroll {
+        0%   { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .entity-state.marquee .marquee-inner {
+          animation: none;
+        }
       }
 
       /* Camera-specific styles */
