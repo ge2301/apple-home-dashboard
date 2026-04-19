@@ -630,7 +630,11 @@ export class DashboardConfig {
         result = entityState !== 'off';
         break;
       case 'media_player':
-        result = ['playing', 'paused', 'buffering', 'on'].includes(entityState);
+        if (entityState === 'paused' && !attributes?.media_title) {
+          result = false;
+        } else {
+          result = ['playing', 'paused', 'buffering', 'on'].includes(entityState);
+        }
         break;
       case 'lock':
         // Locked state should look like "off" (inactive), unlocked state is active
@@ -709,7 +713,7 @@ export class DashboardConfig {
         return entityState === 'on' ? localize('status.on') : localize('status.off');
 
       case 'media_player':
-        return this.getMediaPlayerStateText(entityState);
+        return this.getMediaPlayerStateText(entityState, attributes);
 
       case 'lock':
         return this.getLockStateText(entityState);
@@ -803,11 +807,14 @@ export class DashboardConfig {
   /**
    * Get media player-specific state text
    */
-  private static getMediaPlayerStateText(entityState: string): string {
+  private static getMediaPlayerStateText(entityState: string, attributes?: any): string {
     switch (entityState) {
       case 'playing':
         return localize('status.playing');
       case 'paused':
+        if (!attributes?.media_title) {
+          return localize('status.off');
+        }
         return localize('status.paused');
       case 'buffering':
         return localize('status.buffering');
