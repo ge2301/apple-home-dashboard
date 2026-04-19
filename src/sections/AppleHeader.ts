@@ -583,7 +583,6 @@ export class AppleHeader {
     const isMobile = window.innerWidth <= 768;
     const sidebarSection = isMobile ? '' : `
       <div class="dropdown-item settings-item sidebar-toggle">
-        <span class="item-checkmark"></span>
         <ha-icon icon="${RTLHelper.isRTL() ? 'mdi:dock-right' : 'mdi:dock-left'}"></ha-icon>
         <span>${this.uiManager.getSidebarToggleText()}</span>
       </div>`;
@@ -593,22 +592,18 @@ export class AppleHeader {
 
     return `
       <div class="dropdown-item settings-item home-settings-item">
-        <span class="item-checkmark"></span>
         <ha-icon icon="mdi:cog-outline"></ha-icon>
         <span>${localize('ui_actions.home_settings')}</span>
       </div>
       <div class="dropdown-item settings-item edit-item">
-        <span class="item-checkmark"></span>
         <ha-icon icon="mdi:view-grid-outline"></ha-icon>
         <span>${editText}</span>
       </div>
       <div class="dropdown-item settings-item reorder-item">
-        <span class="item-checkmark"></span>
         <ha-icon icon="mdi:view-sequential-outline"></ha-icon>
         <span>${localize('ui_actions.reorder_sections')}</span>
       </div>
       <div class="dropdown-item settings-item header-toggle">
-        <span class="item-checkmark"></span>
         <ha-icon icon="mdi:page-layout-header"></ha-icon>
         <span>${this.uiManager.getHeaderToggleText()}</span>
       </div>${sidebarSection}${roomsSection}
@@ -1093,48 +1088,14 @@ export class AppleHeader {
 
     const buttonRect = this.menuButton.getBoundingClientRect();
     const dropdownHeight = this.dropdown.offsetHeight;
-    const dropdownWidth = this.dropdown.offsetWidth;
     const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
     const spaceBelow = viewportHeight - buttonRect.bottom;
     const spaceAbove = buttonRect.top;
 
-    // Reset positioning classes
     this.dropdown.classList.remove('dropdown-above');
 
-    // If there's not enough space below and more space above, show above
     if (spaceBelow < dropdownHeight + 20 && spaceAbove > dropdownHeight + 20) {
       this.dropdown.classList.add('dropdown-above');
-    }
-
-    // Handle horizontal positioning for RTL
-    if (RTLHelper.isRTL()) {
-      const spaceOnLeft = buttonRect.left;
-      const spaceOnRight = viewportWidth - buttonRect.right;
-
-      // Reset positioning
-      this.dropdown.style.right = 'auto';
-      this.dropdown.style.left = 'auto';
-
-      // If dropdown would overflow on the left, adjust position
-      if (spaceOnLeft < dropdownWidth + 10) {
-        this.dropdown.style.left = '10px';
-      } else {
-        this.dropdown.style.left = '10px'; // Keep consistent with CSS
-      }
-    } else {
-      const spaceOnRight = viewportWidth - buttonRect.right;
-
-      // Reset positioning
-      this.dropdown.style.right = 'auto';
-      this.dropdown.style.left = 'auto';
-
-      // If dropdown would overflow on the right, adjust position
-      if (spaceOnRight < dropdownWidth + 10) {
-        this.dropdown.style.right = '10px';
-      } else {
-        this.dropdown.style.right = '10px'; // Keep consistent with CSS
-      }
     }
   }
 
@@ -2137,8 +2098,6 @@ export class AppleHeader {
         --mdc-icon-size: 20px;
       }
 
-      /* Checkmark placeholder for all items */
-      .dropdown-item .item-checkmark,
       .dropdown-item .room-checkmark {
         width: 20px;
         height: 20px;
@@ -2223,7 +2182,6 @@ export class AppleHeader {
       :host([dir="rtl"]) .apple-header-dropdown,
       :host-context([dir="rtl"]) .apple-header-dropdown {
         right: auto;
-        left: 10px;
       }
 
       /* Add top padding to page content when header is fixed (group pages) */
@@ -2275,12 +2233,6 @@ export class AppleHeader {
         
         .apple-header-dropdown {
           width: 200px;
-          right: 8px;
-        }
-        
-        .apple-home-header.rtl .apple-header-dropdown {
-          right: auto;
-          left: 8px;
         }
       }
       
@@ -2301,12 +2253,6 @@ export class AppleHeader {
         
         .apple-header-dropdown {
           width: 180px;
-          right: 6px;
-        }
-        
-        .apple-home-header.rtl .apple-header-dropdown {
-          right: auto;
-          left: 6px;
         }
         
         .dropdown-item {

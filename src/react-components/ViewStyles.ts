@@ -49,11 +49,17 @@ export const viewStyles = `
 .apple-home-header .apple-header-menu-button {
   right: calc(2 * var(--apple-page-padding, 22px)) !important;
 }
+.apple-home-header .apple-header-dropdown {
+  right: calc(2 * var(--apple-page-padding, 22px)) !important;
+}
 .apple-home-header.group-page .apple-header-sidebar-button,
 .apple-home-header.group-page .apple-header-back-button {
   left: var(--apple-page-padding, 22px) !important;
 }
 .apple-home-header.group-page .apple-header-menu-button {
+  right: var(--apple-page-padding, 22px) !important;
+}
+.apple-home-header.group-page .apple-header-dropdown {
   right: var(--apple-page-padding, 22px) !important;
 }
 .apple-home-header.rtl .apple-header-sidebar-button,
@@ -62,6 +68,10 @@ export const viewStyles = `
   right: calc(2 * var(--apple-page-padding, 22px)) !important;
 }
 .apple-home-header.rtl .apple-header-menu-button {
+  right: auto !important;
+  left: calc(2 * var(--apple-page-padding, 22px)) !important;
+}
+.apple-home-header.rtl .apple-header-dropdown {
   right: auto !important;
   left: calc(2 * var(--apple-page-padding, 22px)) !important;
 }
@@ -74,29 +84,39 @@ export const viewStyles = `
   right: auto !important;
   left: var(--apple-page-padding, 22px) !important;
 }
+.apple-home-header.group-page.rtl .apple-header-dropdown {
+  right: auto !important;
+  left: var(--apple-page-padding, 22px) !important;
+}
 @media (max-width: 768px) {
   .apple-home-header .apple-header-sidebar-button,
   .apple-home-header .apple-header-back-button { left: 32px !important; }
   .apple-home-header .apple-header-menu-button { right: 32px !important; }
+  .apple-home-header .apple-header-dropdown { right: 32px !important; }
   .apple-home-header.rtl .apple-header-sidebar-button,
   .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 32px !important; }
   .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 32px !important; }
+  .apple-home-header.rtl .apple-header-dropdown { right: auto !important; left: 32px !important; }
 }
 @media (max-width: 479px) {
   .apple-home-header .apple-header-sidebar-button,
   .apple-home-header .apple-header-back-button { left: 24px !important; }
   .apple-home-header .apple-header-menu-button { right: 24px !important; }
+  .apple-home-header .apple-header-dropdown { right: 24px !important; }
   .apple-home-header.rtl .apple-header-sidebar-button,
   .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 24px !important; }
   .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 24px !important; }
+  .apple-home-header.rtl .apple-header-dropdown { right: auto !important; left: 24px !important; }
 }
 @media (max-width: 359px) {
   .apple-home-header .apple-header-sidebar-button,
   .apple-home-header .apple-header-back-button { left: 20px !important; }
   .apple-home-header .apple-header-menu-button { right: 20px !important; }
+  .apple-home-header .apple-header-dropdown { right: 20px !important; }
   .apple-home-header.rtl .apple-header-sidebar-button,
   .apple-home-header.rtl .apple-header-back-button { left: auto !important; right: 20px !important; }
   .apple-home-header.rtl .apple-header-menu-button { right: auto !important; left: 20px !important; }
+  .apple-home-header.rtl .apple-header-dropdown { right: auto !important; left: 20px !important; }
 }
 
 .apple-page-title {
